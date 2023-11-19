@@ -1,0 +1,51 @@
+.ENCODED {
+    padding: 3px;
+    font-weight: bold;
+    background-color: grey;
+}
+.PRODUCTION {
+    padding: 3px;
+    font-weight: bold;
+    background-color: blue;
+}
+.CUT {
+    padding: 3px;
+    font-weight: bold;
+    background-color: blueviolet;
+}
+.BENT {
+    padding: 3px;
+    font-weight: bold;
+    background-color: palevioletred;
+}
+.COMBINED {
+    padding: 3px;
+    font-weight: bold;
+    background-color: yellow;
+}
+.WELDED {
+    padding: 3px;
+    font-weight: bold;
+    background-color: red;
+}
+.ASSEMBLED {
+    padding: 3px;
+    font-weight: bold;
+    background-color: lightskyblue;
+}
+.FINISHED {
+    padding: 3px;
+    font-weight: bold;
+    background-color: orange;
+}
+.PACKED {
+    padding: 3px;
+    font-weight: bold;
+    background-color: black;
+    color: white;
+}
+.SENT {
+    padding: 3px;
+    font-weight: bold;
+    background-color: green;
+}

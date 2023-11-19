@@ -1,0 +1,54 @@
+<h2>Planning</h2>
+<hr>
+<table class="table table-striped">
+    <thead>
+    <tr class="table-dark">
+        <th scope="col">Step</th>
+        <th scope="col">Client</th>
+        <th scope="col">Product Family</th>
+        <th scope="col">Product Variant</th>
+        <th scope="col">Batch</th>
+        <th scope="col">Packet</th>
+        <th scope="col">Order Date</th>
+        <th scope="col">Delivery Date</th>
+    </tr>
+    <tr class="table-dark">
+        <th scope="col">
+            <select></select>
+        </th>
+        <th scope="col">
+            <select></select>
+        </th>
+        <th scope="col">
+            <select></select>
+        </th>
+        <th scope="col">
+            <input type="text">
+        </th>
+        <th scope="col">
+            <select></select>
+        </th>
+        <th scope="col">
+            <select></select>
+        </th>
+        <th scope="col">
+            <input type="date">
+        </th>
+        <th scope="col">
+            <input type="date">
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let product of products">
+        <td><span [ngClass]=product.currentStep>{{product.currentStep | step}}</span></td>
+        <td>{{product.order.client.name}}</td>
+        <td>{{product.variant.productFamily.name}}</td>
+        <td>{{product.variant.code}}</td>
+        <td>{{product.batchCode}}</td>
+        <td>{{product.packetCode}}</td>
+        <td>{{product.order.createdDate | date: 'shortDate'}}</td>
+        <td>{{product.order.plannedDeliveryDate | date: 'shortDate'}}</td>
+    </tr>
+    </tbody>
+</table>
