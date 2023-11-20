@@ -1,15 +1,15 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import {PlanningComponent} from "./planning/planning.component";
-import {ProductionComponent} from "./production/production.component";
-import {CutComponent} from "./cut/cut.component";
-import {BendComponent} from "./bend/bend.component";
-import {CombineComponent} from "./combine/combine.component";
-import {WeldComponent} from "./weld/weld.component";
-import {AssembleComponent} from "./assemble/assemble.component";
-import {FinishComponent} from "./finish/finish.component";
-import {PackComponent} from "./pack/pack.component";
-import {ShipComponent} from "./ship/ship.component";
+import {PlanningComponent} from "./components/planning/planning.component";
+import {ProductionComponent} from "./components/production/production.component";
+import {CutComponent} from "./components/cut/cut.component";
+import {BendComponent} from "./components/bend/bend.component";
+import {CombineComponent} from "./components/combine/combine.component";
+import {WeldComponent} from "./components/weld/weld.component";
+import {AssembleComponent} from "./components/assemble/assemble.component";
+import {FinishComponent} from "./components/finish/finish.component";
+import {PackComponent} from "./components/pack/pack.component";
+import {ShipComponent} from "./components/ship/ship.component";
 
 const routes: Routes = [
   {path: '', redirectTo: 'planning', pathMatch:'full'},

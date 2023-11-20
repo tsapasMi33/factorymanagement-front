@@ -22,7 +22,7 @@ export class ProductService {
   constructor(private http: HttpClient) { }
 
   getProductsPage(page: number,filter: Filter) {
-    let params = new HttpParams()
+    let params = new HttpParams();
     params = params.append('page', page)
     for (const filterKey in filter) {
       let key = filterKey as keyof Filter

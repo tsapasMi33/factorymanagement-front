@@ -1,15 +1,16 @@
 import {Component, OnInit} from '@angular/core';
-import {ProductService} from "../services/product.service";
-import {Product} from "../../../core/models/product.model";
-import {ProductFamily} from "../../../core/models/product-family.model";
-import {FormControl, FormGroup} from "@angular/forms";
+import {Product} from "../../../../core/models/product.model";
+import {ProductFamily} from "../../../../core/models/product-family.model";
+import {FormArray, FormControl, FormGroup} from "@angular/forms";
+import {ProductService} from "../../services/product.service";
+import {BatchService} from "../../services/batch.service";
 
 @Component({
-    selector: 'app-planning',
-    templateUrl: './planning.component.html',
-    styleUrls: ['./planning.component.css']
+  selector: 'app-production',
+  templateUrl: './production.component.html',
+  styleUrls: ['./production.component.css']
 })
-export class PlanningComponent implements OnInit {
+export class ProductionComponent implements OnInit {
   public products!: Product[];
   public clientsPresent!: { id: number, name: string }[];
   public productFamiliesPresent!: ProductFamily[];
@@ -20,17 +21,22 @@ export class PlanningComponent implements OnInit {
   public currentPage!: number
 
   filterForm: FormGroup;
+  createBatchForm: FormGroup;
 
-  constructor(private planningService$: ProductService) {
+  constructor(private planningService$: ProductService,
+              private batchService$: BatchService) {
     this.filterForm = new FormGroup({
-      currentStep: new FormControl(null),
       clientId: new FormControl(null),
       productFamilyId: new FormControl(null),
       productVariantCode: new FormControl(null),
-      batchId: new FormControl(null),
-      packetId: new FormControl(null),
       orderDate: new FormControl(null),
       deliveryDate: new FormControl(null)
+    });
+
+    this.createBatchForm = new FormGroup({
+      products: new FormArray(
+        []
+      )
     })
   }
 
@@ -45,9 +51,8 @@ export class PlanningComponent implements OnInit {
   }
 
   load(page: number){
-    this.planningService$.getProductsPage(page,{...this.filterForm.value}).subscribe({
+    this.planningService$.getProductsPage(page,{currentStep:"ENCODED",...this.filterForm.value}).subscribe({
       next: value => {
-        console.log(value)
         this.products = value.content;
 
         this.clientsPresent = [...new Map(this.products.map(value => [value.order.client.id, value.order.client])).values()];
@@ -108,5 +113,30 @@ export class PlanningComponent implements OnInit {
       this.currentPage += 1;
     }
     this.load(this.currentPage);
+  }
+
+  get createBatchFormArray(): FormArray {
+    return this.createBatchForm.get('products') as FormArray;
+  }
+
+  onCheckBoxChange(event: any, productId: number) {
+    if (event.target.checked) {
+      this.createBatchFormArray.push(new FormControl({id: productId}));
+    } else {
+      const idx = this.createBatchFormArray.controls.findIndex(fc => fc.value.id ===  productId);
+      this.createBatchFormArray.removeAt(idx);
+    }
+  }
+
+  onPutBatchInProduction() {
+    this.batchService$.createBatch(this.createBatchForm.value).subscribe({
+      next: response => {
+        this.load(this.currentPage);
+        this.createBatchForm = new FormGroup({
+          products: new FormArray([])
+        })
+        },
+      error: err => console.error(err)
+    })
   }
 }

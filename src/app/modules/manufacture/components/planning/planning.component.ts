@@ -1,15 +1,15 @@
-import { Component } from '@angular/core';
-import {Product} from "../../../core/models/product.model";
-import {ProductFamily} from "../../../core/models/product-family.model";
-import {FormArray, FormControl, FormGroup} from "@angular/forms";
-import {ProductService} from "../services/product.service";
+import {Component, OnInit} from '@angular/core';
+import {ProductService} from "../../services/product.service";
+import {Product} from "../../../../core/models/product.model";
+import {ProductFamily} from "../../../../core/models/product-family.model";
+import {FormControl, FormGroup} from "@angular/forms";
 
 @Component({
-  selector: 'app-production',
-  templateUrl: './production.component.html',
-  styleUrls: ['./production.component.css']
+    selector: 'app-planning',
+    templateUrl: './planning.component.html',
+    styleUrls: ['./planning.component.css']
 })
-export class ProductionComponent {
+export class PlanningComponent implements OnInit {
   public products!: Product[];
   public clientsPresent!: { id: number, name: string }[];
   public productFamiliesPresent!: ProductFamily[];
@@ -20,20 +20,17 @@ export class ProductionComponent {
   public currentPage!: number
 
   filterForm: FormGroup;
-  createBatchForm: FormGroup;
 
   constructor(private planningService$: ProductService) {
     this.filterForm = new FormGroup({
+      currentStep: new FormControl(null),
       clientId: new FormControl(null),
       productFamilyId: new FormControl(null),
       productVariantCode: new FormControl(null),
+      batchId: new FormControl(null),
+      packetId: new FormControl(null),
       orderDate: new FormControl(null),
       deliveryDate: new FormControl(null)
-    });
-    this.createBatchForm = new FormGroup({
-      products: new FormArray(
-        []
-      )
     })
   }
 
@@ -48,9 +45,8 @@ export class ProductionComponent {
   }
 
   load(page: number){
-    this.planningService$.getProductsPage(page,{currentStep:"ENCODED",...this.filterForm.value}).subscribe({
+    this.planningService$.getProductsPage(page,{...this.filterForm.value}).subscribe({
       next: value => {
-        console.log(value)
         this.products = value.content;
 
         this.clientsPresent = [...new Map(this.products.map(value => [value.order.client.id, value.order.client])).values()];
@@ -111,9 +107,5 @@ export class ProductionComponent {
       this.currentPage += 1;
     }
     this.load(this.currentPage);
-  }
-
-  onPutBatchInProduction() {
-    console.log(this.createBatchForm.value)
   }
 }

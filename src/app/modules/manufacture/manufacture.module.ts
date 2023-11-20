@@ -2,19 +2,20 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { ManufactureRoutingModule } from './manufacture-routing.module';
-import { PlanningComponent } from './planning/planning.component';
-import { ProductionComponent } from './production/production.component';
-import { CutComponent } from './cut/cut.component';
-import { BendComponent } from './bend/bend.component';
-import { CombineComponent } from './combine/combine.component';
-import { WeldComponent } from './weld/weld.component';
-import { AssembleComponent } from './assemble/assemble.component';
-import { FinishComponent } from './finish/finish.component';
-import { PackComponent } from './pack/pack.component';
-import { ShipComponent } from './ship/ship.component';
+import { PlanningComponent } from './components/planning/planning.component';
+import { ProductionComponent } from './components/production/production.component';
+import { CutComponent } from './components/cut/cut.component';
+import { BendComponent } from './components/bend/bend.component';
+import { CombineComponent } from './components/combine/combine.component';
+import { WeldComponent } from './components/weld/weld.component';
+import { AssembleComponent } from './components/assemble/assemble.component';
+import { FinishComponent } from './components/finish/finish.component';
+import { PackComponent } from './components/pack/pack.component';
+import { ShipComponent } from './components/ship/ship.component';
 import {StepPipe} from "../../core/pipes/step.pipe";
 import {ProductService} from "./services/product.service";
 import {ReactiveFormsModule} from "@angular/forms";
+import {BatchService} from "./services/batch.service";
 
 
 @NgModule({
@@ -37,7 +38,8 @@ import {ReactiveFormsModule} from "@angular/forms";
     ReactiveFormsModule,
   ],
   providers: [
-    ProductService
+    ProductService,
+    BatchService
   ]
 })
 export class ManufactureModule { }
