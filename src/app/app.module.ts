@@ -10,7 +10,6 @@ import {Page404Component} from './layout/page404/page404.component';
 import {ReactiveFormsModule} from "@angular/forms";
 import {HTTP_INTERCEPTORS, HttpClientModule} from "@angular/common/http";
 import {AuthInterceptor} from "./core/interceptors/auth.interceptor";
-import { StepPipe } from './core/pipes/step.pipe';
 
 @NgModule({
   declarations: [

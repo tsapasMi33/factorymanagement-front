@@ -1,54 +1,104 @@
 <h2>Planning</h2>
 <hr>
-<table class="table table-striped">
+<div>
+<form [formGroup]="filterForm" (ngSubmit)="onFilter()">
+  <table class="table table-hover">
     <thead>
     <tr class="table-dark">
-        <th scope="col">Step</th>
-        <th scope="col">Client</th>
-        <th scope="col">Product Family</th>
-        <th scope="col">Product Variant</th>
-        <th scope="col">Batch</th>
-        <th scope="col">Packet</th>
-        <th scope="col">Order Date</th>
-        <th scope="col">Delivery Date</th>
+      <th scope="col">Step</th>
+      <th scope="col">Client</th>
+      <th scope="col">Product Family</th>
+      <th scope="col">Product Variant</th>
+      <th scope="col">Batch</th>
+      <th scope="col">Packet</th>
+      <th scope="col">Order Date</th>
+      <th scope="col">Delivery Date</th>
+      <th scope="col"></th>
     </tr>
     <tr class="table-dark">
-        <th scope="col">
-            <select></select>
-        </th>
-        <th scope="col">
-            <select></select>
-        </th>
-        <th scope="col">
-            <select></select>
-        </th>
-        <th scope="col">
-            <input type="text">
-        </th>
-        <th scope="col">
-            <select></select>
-        </th>
-        <th scope="col">
-            <select></select>
-        </th>
-        <th scope="col">
-            <input type="date">
-        </th>
-        <th scope="col">
-            <input type="date">
-        </th>
+      <th scope="col">
+        <select class="form-select-sm" formControlName="currentStep">
+          <option [value]=null selected>All</option>
+          <option value="ENCODED">NCD</option>
+          <option value="PRODUCTION">PRD</option>
+          <option value="CUT">CUT</option>
+          <option value="BENT">BND</option>
+          <option value="COMBINED">CMB</option>
+          <option value="WELDED">WLD</option>
+          <option value="ASSEMBLED">SMB</option>
+          <option value="FINISHED">FNS</option>
+          <option value="PACKED">PCK</option>
+          <option value="SENT">SNT</option>
+        </select>
+      </th>
+      <th scope="col">
+        <select class="form-select-sm" formControlName="clientId">
+          <option [value]=null selected>All</option>
+          <ng-container *ngFor="let client of clientsPresent">
+            <option value="{{client.id}}">{{client.name}}</option>
+          </ng-container>
+        </select>
+      </th>
+      <th scope="col">
+        <select class="form-select-sm" formControlName="productFamilyId">
+          <option [value]=null selected>All</option>
+          <ng-container *ngFor="let family of productFamiliesPresent">
+            <option value="{{family.id}}">{{family.name}}</option>
+          </ng-container>
+        </select>
+      </th>
+      <th scope="col">
+        <input class="form-control form-control-sm" type="text" formControlName="productVariantCode">
+      </th>
+      <th scope="col">
+        <select class="form-select-sm" formControlName="batchId">
+          <option [value]=null selected>All</option>
+          <ng-container *ngFor="let batch of batchesPresent">
+            <option value="{{batch.id}}">{{batch.code}}</option>
+          </ng-container>
+        </select>
+      </th>
+      <th scope="col">
+        <select class="form-select-sm" formControlName="packetId">
+          <option [value]=null selected>All</option>
+          <ng-container *ngFor="let packet of packetsPresent">
+            <option value="{{packet.id}}">{{packet.code}}</option>
+          </ng-container>
+        </select>
+      </th>
+      <th scope="col">
+        <input class="form-control form-control-sm" type="date" formControlName="orderDate">
+      </th>
+      <th scope="col">
+        <input class="form-control form-control-sm" type="date" formControlName="deliveryDate">
+      </th>
+      <th scope="col">
+        <button class="btn btn-primary" type="submit">Apply</button>
+      </th>
     </tr>
     </thead>
     <tbody>
     <tr *ngFor="let product of products">
-        <td><span [ngClass]=product.currentStep>{{product.currentStep | step}}</span></td>
-        <td>{{product.order.client.name}}</td>
-        <td>{{product.variant.productFamily.name}}</td>
-        <td>{{product.variant.code}}</td>
-        <td>{{product.batchCode}}</td>
-        <td>{{product.packetCode}}</td>
-        <td>{{product.order.createdDate | date: 'shortDate'}}</td>
-        <td>{{product.order.plannedDeliveryDate | date: 'shortDate'}}</td>
+      <td><span [ngClass]=product.currentStep>{{product.currentStep | step}}</span></td>
+      <td>{{product.order.client.name}}</td>
+      <td>{{product.variant.productFamily.name}}</td>
+      <td>{{product.variant.code}}</td>
+      <td>{{product.batchCode}}</td>
+      <td>{{product.packetCode}}</td>
+      <td>{{product.order.createdDate | date: 'shortDate'}}</td>
+      <td>{{product.order.plannedDeliveryDate | date: 'shortDate'}}</td>
+      <td>{{product.id}}</td>
     </tr>
     </tbody>
-</table>
+  </table>
+</form>
+<nav class="sticky-bottom">
+  <ul class="pagination">
+    <li class="page-item"><a class="page-link" style="cursor: pointer" (click)="goToPreviousPage()">Previous</a></li>
+    <ng-container *ngFor="let page of pagesNav">
+    <li class="page-item"><a class="page-link" style="cursor: pointer" (click)="goToPage(page)">{{page}}</a></li>
+    </ng-container>
+    <li class="page-item"><a class="page-link" style="cursor: pointer" (click)="goToNextPage()">Next</a></li>
+  </ul>
+</nav>
+</div>

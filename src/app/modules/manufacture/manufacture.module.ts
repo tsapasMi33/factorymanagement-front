@@ -13,6 +13,8 @@ import { FinishComponent } from './finish/finish.component';
 import { PackComponent } from './pack/pack.component';
 import { ShipComponent } from './ship/ship.component';
 import {StepPipe} from "../../core/pipes/step.pipe";
+import {ProductService} from "./services/product.service";
+import {ReactiveFormsModule} from "@angular/forms";
 
 
 @NgModule({
@@ -32,6 +34,10 @@ import {StepPipe} from "../../core/pipes/step.pipe";
   imports: [
     CommonModule,
     ManufactureRoutingModule,
+    ReactiveFormsModule,
+  ],
+  providers: [
+    ProductService
   ]
 })
 export class ManufactureModule { }
