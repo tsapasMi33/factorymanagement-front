@@ -1,38 +1,33 @@
 <h2>Finish</h2>
 <hr>
-<ng-container>
-<div class="row row-cols-1 row-cols-md-3 g-4">
-    <div class="col">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title">Card title</h5>
-                <p class="card-text">This is a longer card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
-            </div>
+<div class="row row-cols-1 row-cols-md-5 g-5">
+  <div class="col" *ngFor="let product of products">
+    <div class="card h-100">
+      <div class="card-header">
+        {{product.order.client.name}}
+      </div>
+      <div class="card-body">
+        <h5 class="card-title">{{product.variant.productFamily.name}}</h5>
+        <h6 class="card-subtitle">{{product.variant.code }}</h6>
+        <p class="card-text">{{product.variant.description}}</p>
+        <p class="card-text text-body-emphasis">{{product.comments}}</p>
+      </div>
+      <div class="card-footer text-center">
+        <div class="btn-group" role="group">
+          <button type="button" class="btn btn-success" (click)="onStartJob(product.id)">&#9658;</button>
+          <button type="button" class="btn btn-warning" (click)="onPauseJob(product.id)">&#10074;&#10074;</button>
+          <button type="button" class="btn btn-danger" (click)="onFinishJob(product.id)">&#9724;</button>
         </div>
+      </div>
     </div>
-    <div class="col">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title">Card title</h5>
-                <p class="card-text">This is a short card.</p>
-            </div>
-        </div>
-    </div>
-    <div class="col">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title">Card title</h5>
-                <p class="card-text">This is a longer card with supporting text below as a natural lead-in to additional content.</p>
-            </div>
-        </div>
-    </div>
-    <div class="col">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title">Card title</h5>
-                <p class="card-text">This is a longer card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
-            </div>
-        </div>
-    </div>
+  </div>
 </div>
-</ng-container>
+<ngb-pagination
+  class="d-flex justify-content-center"
+  [collectionSize]="collectionSize"
+  [maxSize]="maxSize"
+  [(page)]="page"
+  [pageSize]="pageSize"
+  [rotate]="rotate"
+  (pageChange)="pageChanged($event)"
+></ngb-pagination>

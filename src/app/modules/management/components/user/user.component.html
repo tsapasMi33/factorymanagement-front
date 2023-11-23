@@ -1,0 +1,65 @@
+<h2>Users</h2>
+<div class="text-end">
+  <button class="btn btn-primary" type="button" (click)="createUser(modal)">Create User</button>
+</div>
+<div class="row row-cols-1 row-cols-md-5 g-4" >
+  <div class="col" *ngFor="let user of users">
+    <div class="card h-100" [ngClass]="user.enabled ? 'border-success' : 'border-danger'">
+    <div class="card-header">
+      <h5 class="card-title">{{user.username}}</h5>
+    </div>
+      <div class="card-body" [ngClass]="user.enabled ? 'text-success' : 'text-danger'">
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item" [ngClass]="user.enabled ? 'text-success' : 'text-danger'">Role: {{user.role}}</li>
+          <li class="list-group-item" [ngClass]="user.enabled ? 'text-success' : 'text-danger'">Cost Per Minute: {{user.costPerMinute | currency : 'EUR'}}</li>
+          <li class="list-group-item" [ngClass]="user.enabled ? 'text-success' : 'text-danger'">Since: {{user.createdDate | date: 'EEE, d/L/yyyy'}}</li>
+        </ul>
+      </div>
+      <div class="card-footer text-center">
+        <small class="text-body-secondary">
+          <button type="button" class="btn btn-primary btn-sm" (click)="toggleUser(user.id, user.enabled)">{{user.enabled ? 'Disable' : 'Enable'}}</button>
+          <button type="button" class="btn btn-primary btn-sm" (click)="getUser(user.id, modal)">Modify</button>
+        </small>
+      </div>
+    </div>
+  </div>
+</div>
+<ng-template #modal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{create ? "Create" : "Update"}} User</h4>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="userForm">
+      <div class="mb-3">
+        <div class="form-floating mb-3">
+          <input type="text" class="form-control" id="floatingInput" placeholder="Username" formControlName="username">
+          <label for="floatingInput">Username</label>
+        </div>
+        <div class="form-floating">
+          <input type="password" class="form-control" id="floatingPassword" placeholder="Password" formControlName="password">
+          <label for="floatingPassword">Password</label>
+        </div>
+        <label for="role">Role</label>
+        <select class="form-select" id="role"  formControlName="role">
+          <option selected disabled>Choose one</option>
+          <option>ADMIN</option>
+          <option>CUTTER</option>
+          <option>BENDER</option>
+          <option>COMBINER</option>
+          <option>WELDER</option>
+          <option>FINISHER</option>
+          <option>PACKER</option>
+        </select>
+        <label for="costPerMinute">Cost Per Minute</label>
+        <div class="input-group mb-3">
+          <span class="input-group-text">€</span>
+          <input type="number" class="form-control" id="costPerMinute"  formControlName="costPerMinute">
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-success" (click)="saveClient(modal)">{{create ? 'Create' : 'Update'}}</button>
+  </div>
+</ng-template>

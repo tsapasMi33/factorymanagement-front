@@ -8,25 +8,27 @@ import {Batch} from "../../../../core/models/batch.model";
   styleUrls: ['./cut.component.css']
 })
 export class CutComponent implements OnInit{
-  public batches!: Batch[]
+  public batches!: Batch[];
 
+  public  collectionSize!: number;
+  public page!: number;
+  public pageSize!: number;
   public totalPages!: number;
-  public currentPage!: number
+  public maxSize=15;
+  public rotate= true;
 
   constructor(private batchService$: BatchService) {
   }
 
   ngOnInit(): void {
-    this.currentPage = 1;
-    this.load(this.currentPage)
-    console.log(this.currentPage)
+    this.load(1)
   }
 
   load(page: number) {
     this.batchService$.getBatchesFor(page, "CUT").subscribe({
-      next: response => {
-        console.log(response)
-        this.batches = response.content.map(batch => {
+      next: value => {
+        console.log(value)
+        this.batches = value.content.map(batch => {
           batch.products.map(product => {
             product.variant.components.filter(component => component.type === "PLATE")
             return product;
@@ -34,71 +36,31 @@ export class CutComponent implements OnInit{
           return batch;
         });
 
-        this.currentPage = response.pageable.pageNumber + 1;
-        this.totalPages = response.totalPages;
-        console.log(this.currentPage, this. totalPages)
+        this.collectionSize = value.totalElements;
+        this.page = value.number + 1;
+        this.pageSize = value.size;
+        this.totalPages = value.totalPages;
       },
       error: err => console.error(err)
     })
   }
 
-  onStartCut(batchId: number) {
-    this.batchService$.doJob("CUT", batchId, 'start').subscribe();
+  onStartJob(id: number) {
+    this.batchService$.doJob("CUT", id, 'start').subscribe();
   }
 
-  onPauseCut(batchId: number) {
-    this.batchService$.doJob("CUT", batchId, 'pause').subscribe();
+  onPauseJob(id: number) {
+    this.batchService$.doJob("CUT", id, 'pause').subscribe();
   }
 
-  onFinishCut(batchId: number) {
-    this.load(this.currentPage)
-    this.batchService$.doJob("CUT", batchId, 'finish').subscribe();
+  onFinishJob(id: number) {
+    this.batchService$.doJob("CUT", id, 'finish').subscribe({
+      next: response => this.load(this.page),
+      error: err => {console.log(err)}
+    });
   }
 
-  get pagesNav(): number[] {
-    const displayedPages = [];
-    let totalPagesToShow = 10;
-    const halfPagesToShow = Math.floor(totalPagesToShow / 2);
-
-    if( this.totalPages < 11) {
-      totalPagesToShow = this.totalPages
-    }
-
-    let startPage = this.currentPage - halfPagesToShow;
-    let endPage = this.currentPage + halfPagesToShow;
-
-    if (startPage < 1) {
-      startPage = 1;
-      endPage = totalPagesToShow;
-    }
-
-    if (endPage > this.totalPages) {
-      endPage = this.totalPages;
-      startPage = this.totalPages - totalPagesToShow + 1;
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      displayedPages.push(i);
-    }
-
-    return displayedPages;
-  }
-
-  goToPreviousPage() {
-    if (this.currentPage > 1) {
-      this.currentPage -= 1;
-    }
-    this.load(this.currentPage);
-  }
-
-  goToPage(page: number) {
-    this.load(page);
-  }
-
-  goToNextPage() {
-    if (this.currentPage < this.totalPages) {
-      this.currentPage += 1;
-    }
-    this.load(this.currentPage);
+  public pageChanged(event: any) {
+    this.load(event);
   }
 }

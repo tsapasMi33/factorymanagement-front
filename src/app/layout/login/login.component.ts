@@ -14,7 +14,7 @@ export class LoginComponent {
   constructor(private $authService: AuthService) {
     this.form = new FormGroup({
       username: new FormControl(null, [Validators.required]),
-      password: new FormControl(null,[Validators.min(6), Validators.max(6)])
+      password: new FormControl(null,[Validators.minLength(6),Validators.maxLength(6)])
     })
   }
 

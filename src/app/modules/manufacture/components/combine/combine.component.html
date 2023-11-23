@@ -1,140 +1,59 @@
 <h2>Combine</h2>
 <hr>
-<ng-container>
+<div>
+  <ng-container *ngFor="let batch of batches">
     <div class="card">
-        <div class="card-header">
-            Batch Code
-        </div>
-        <div class="card-body">
-            <h5 class="card-title">Components</h5>
-            <table class="table">
-                <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">First</th>
-                    <th scope="col">Last</th>
-                    <th scope="col">Handle</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <th scope="row">1</th>
-                    <td>Mark</td>
-                    <td>Otto</td>
-                    <td>@mdo</td>
-                </tr>
-                <tr>
-                    <th scope="row">2</th>
-                    <td>Jacob</td>
-                    <td>Thornton</td>
-                    <td>@fat</td>
-                </tr>
-                <tr>
-                    <th scope="row">3</th>
-                    <td colspan="2">Larry the Bird</td>
-                    <td>@twitter</td>
-                </tr>
-                </tbody>
-            </table>
-            <div class="card-footer">
-                <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-success">&#9658;</button>
-                    <button type="button" class="btn btn-warning">&#10074;&#10074;</button>
-                    <button type="button" class="btn btn-danger">&#9724;</button>
-                </div>
-            </div>
+      <div class="card-header">
+        Batch #: {{batch.code}}
+      </div>
+      <div class="card-body">
+        <h5 class="card-title">Components</h5>
+        <table class="table">
+          <thead>
+          <tr>
+            <th scope="col">Part</th>
+            <th scope="col">Product</th>
+            <th scope="col">Code</th>
+            <th scope="col">Material</th>
+            <th scope="col">Thickness</th>
+            <th scope="col">Width</th>
+            <th scope="col">Length</th>
+          </tr>
+          </thead>
+          <tbody>
+
+          <ng-container *ngFor="let product of batch.products">
+            <ng-container *ngFor="let component of product.variant.components">
+              <tr>
+                <td>{{component.name}}</td>
+                <td>{{product.variant.productFamily.name}}</td>
+                <td>{{product.variant.code}}</td>
+                <td>{{component.material}}</td>
+                <td>{{component.thickness}}</td>
+                <td>{{component.width}}</td>
+                <td>{{component.length}}</td>
+              </tr>
+            </ng-container>
+          </ng-container>
+          </tbody>
+        </table>
+      </div>
+        <div class="card-footer text-center">
+          <div class="btn-group" role="group">
+            <button type="button" class="btn btn-success" (click)="onStartJob(batch.id)">&#9658;</button>
+            <button type="button" class="btn btn-warning" (click)="onPauseJob(batch.id)">&#10074;&#10074;</button>
+            <button type="button" class="btn btn-danger" (click)="onFinishJob(batch.id)">&#9724;</button>
+          </div>
         </div>
     </div>
-
-    <div class="card">
-        <div class="card-header">
-            Batch Code
-        </div>
-        <div class="card-body">
-            <h5 class="card-title">Components</h5>
-            <table class="table">
-                <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">First</th>
-                    <th scope="col">Last</th>
-                    <th scope="col">Handle</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <th scope="row">1</th>
-                    <td>Mark</td>
-                    <td>Otto</td>
-                    <td>@mdo</td>
-                </tr>
-                <tr>
-                    <th scope="row">2</th>
-                    <td>Jacob</td>
-                    <td>Thornton</td>
-                    <td>@fat</td>
-                </tr>
-                <tr>
-                    <th scope="row">3</th>
-                    <td colspan="2">Larry the Bird</td>
-                    <td>@twitter</td>
-                </tr>
-                </tbody>
-            </table>
-            <div class="card-footer">
-                <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-success">&#9658;</button>
-                    <button type="button" class="btn btn-warning">&#10074;&#10074;</button>
-                    <button type="button" class="btn btn-danger">&#9724;</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-header">
-            Batch Code
-        </div>
-        <div class="card-body">
-            <h5 class="card-title">Components</h5>
-            <table class="table">
-                <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">First</th>
-                    <th scope="col">Last</th>
-                    <th scope="col">Handle</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <th scope="row">1</th>
-                    <td>Mark</td>
-                    <td>Otto</td>
-                    <td>@mdo</td>
-                </tr>
-                <tr>
-                    <th scope="row">2</th>
-                    <td>Jacob</td>
-                    <td>Thornton</td>
-                    <td>@fat</td>
-                </tr>
-                <tr>
-                    <th scope="row">3</th>
-                    <td colspan="2">Larry the Bird</td>
-                    <td>@twitter</td>
-                </tr>
-                </tbody>
-            </table>
-            <div class="card-footer">
-                <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-success">&#9658;</button>
-                    <button type="button" class="btn btn-warning">&#10074;&#10074;</button>
-                    <button type="button" class="btn btn-danger">&#9724;</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</ng-container>
-
-<p>combine works!</p>
+  </ng-container>
+  <ngb-pagination
+    class="d-flex justify-content-center"
+    [collectionSize]="collectionSize"
+    [maxSize]="maxSize"
+    [(page)]="page"
+    [pageSize]="pageSize"
+    [rotate]="rotate"
+    (pageChange)="pageChanged($event)"
+  ></ngb-pagination>
+</div>

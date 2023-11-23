@@ -16,6 +16,7 @@ import {StepPipe} from "../../core/pipes/step.pipe";
 import {ProductService} from "./services/product.service";
 import {ReactiveFormsModule} from "@angular/forms";
 import {BatchService} from "./services/batch.service";
+import {NgbPagination} from "@ng-bootstrap/ng-bootstrap";
 
 
 @NgModule({
@@ -32,11 +33,12 @@ import {BatchService} from "./services/batch.service";
     ShipComponent,
     StepPipe,
   ],
-  imports: [
-    CommonModule,
-    ManufactureRoutingModule,
-    ReactiveFormsModule,
-  ],
+    imports: [
+        CommonModule,
+        ManufactureRoutingModule,
+        ReactiveFormsModule,
+        NgbPagination,
+    ],
   providers: [
     ProductService,
     BatchService

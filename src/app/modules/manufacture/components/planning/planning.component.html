@@ -92,13 +92,13 @@
     </tbody>
   </table>
 </form>
-<nav class="sticky-bottom">
-  <ul class="pagination">
-    <li class="page-item"><a class="page-link" style="cursor: pointer" (click)="goToPreviousPage()">Previous</a></li>
-    <ng-container *ngFor="let page of pagesNav">
-    <li class="page-item"><a class="page-link" style="cursor: pointer" (click)="goToPage(page)" [ngClass]="page === currentPage ?'active': ''">{{page}}</a></li>
-    </ng-container>
-    <li class="page-item"><a class="page-link" style="cursor: pointer" (click)="goToNextPage()">Next</a></li>
-  </ul>
-</nav>
+<ngb-pagination
+  class="d-flex justify-content-center"
+  [collectionSize]="collectionSize"
+  [maxSize]="maxSize"
+  [(page)]="page"
+  [pageSize]="pageSize"
+  [rotate]="rotate"
+  (pageChange)="pageChanged($event)"
+  ></ngb-pagination>
 </div>

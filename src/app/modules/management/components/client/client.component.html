@@ -1,0 +1,76 @@
+<h2>Clients</h2>
+<div class="text-end">
+  <button class="btn btn-primary" type="button" (click)="createClient(modal)">Create Client</button>
+</div>
+<table class="table table-striped">
+  <thead>
+  <tr>
+    <th scope="col">id</th>
+    <th scope="col">Name</th>
+    <th scope="col">Address</th>
+    <th scope="col">Discount %</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let client of clients" (click)="getClient(client.id, modal)" style="cursor: pointer">
+    <th scope="row">{{client.id}}</th>
+    <td>{{client.name}} {{client.companyType}}</td>
+    <td>{{client.address.street}} {{client.address.number}}, {{client.address.cp}} {{client.address.city}}
+      , {{client.address.country}}</td>
+    <td>{{client.discountPercentage}}</td>
+  </tr>
+  </tbody>
+  <ng-template #modal let-modal>
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">{{create ? "Create" : "Update"}} Client</h4>
+      <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+    </div>
+    <div class="modal-body">
+      <form>
+        <div class="mb-3">
+          <form [formGroup]="clientForm">
+            <div class="mb-3 row">
+              <div class="col-7">
+                <input type="text" class="form-control" formControlName="name" placeholder="Name">
+              </div>
+              <div class="col-3">
+                <input type="text" class="form-control" formControlName="companyType" placeholder="Type">
+              </div>
+              <div class="col-2">
+                <input type="number" class="form-control" formControlName="discountPercentage" placeholder="Discount %">
+              </div>
+              <br><br>
+              <div formGroupName="address">
+                <div class="mb-3 row">
+                  <div class="col-6">
+                    <input type="text" class="form-control" formControlName="street" placeholder="Street">
+                  </div>
+                  <div class="col-3">
+                    <input type="text" class="form-control" formControlName="number" placeholder="No">
+                  </div>
+                  <div class="col-3">
+                    <input type="text" class="form-control" formControlName="cp" placeholder="CP">
+                  </div>
+                </div>
+                <div class="mb-3 row">
+                  <div class="col-6">
+                    <input type="text" class="form-control" formControlName="city" placeholder="City">
+                  </div>
+                  <div class="col-6">
+                    <input type="text" class="form-control" formControlName="country" placeholder="Country">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline-success" (click)="saveClient(modal)">{{create ? 'Create' : 'Update'}}</button>
+      <button type="button" class="btn btn-outline-danger" (click)="deleteClient(modal)" *ngIf="selectedClientId != 0">Delete</button>
+    </div>
+  </ng-template>
+
+
+</table>

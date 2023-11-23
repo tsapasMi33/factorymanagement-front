@@ -1,4 +1,4 @@
-<h2>Cut Plates</h2>
+<h2>Cut</h2>
 <hr>
 <div>
 <ng-container *ngFor="let batch of batches">
@@ -11,9 +11,9 @@
       <table class="table">
         <thead>
         <tr>
+          <th scope="col">Part</th>
           <th scope="col">Product</th>
           <th scope="col">Code</th>
-          <th scope="col">Part</th>
           <th scope="col">Material</th>
           <th scope="col">Thickness</th>
           <th scope="col">Width</th>
@@ -25,9 +25,9 @@
         <ng-container *ngFor="let product of batch.products">
           <ng-container *ngFor="let component of product.variant.components">
             <tr>
+              <td>{{component.name}}</td>
               <td>{{product.variant.productFamily.name}}</td>
               <td>{{product.variant.code}}</td>
-              <td>{{component.name}}</td>
               <td>{{component.material}}</td>
               <td>{{component.thickness}}</td>
               <td>{{component.width}}</td>
@@ -37,23 +37,23 @@
         </ng-container>
         </tbody>
       </table>
+    </div>
       <div class="card-footer text-center">
         <div class="btn-group" role="group">
-          <button type="button" class="btn btn-success" (click)="onStartCut(batch.id)">&#9658;</button>
-          <button type="button" class="btn btn-warning" (click)="onPauseCut(batch.id)">&#10074;&#10074;</button>
-          <button type="button" class="btn btn-danger" (click)="onFinishCut(batch.id)">&#9724;</button>
+          <button type="button" class="btn btn-success" (click)="onStartJob(batch.id)">&#9658;</button>
+          <button type="button" class="btn btn-warning" (click)="onPauseJob(batch.id)">&#10074;&#10074;</button>
+          <button type="button" class="btn btn-danger" (click)="onFinishJob(batch.id)">&#9724;</button>
         </div>
       </div>
-    </div>
   </div>
 </ng-container>
-  <nav class="sticky-bottom">
-    <ul class="pagination">
-      <li class="page-item"><a class="page-link" style="cursor: pointer" (click)="goToPreviousPage()">Previous</a></li>
-      <ng-container *ngFor="let page of pagesNav">
-        <li class="page-item"><a class="page-link" style="cursor: pointer" (click)="goToPage(page)" [ngClass]="page === currentPage ?'active': ''">{{page}}</a></li>
-      </ng-container>
-      <li class="page-item"><a class="page-link" style="cursor: pointer" (click)="goToNextPage()">Next</a></li>
-    </ul>
-  </nav>
+  <ngb-pagination
+    class="d-flex justify-content-center"
+    [collectionSize]="collectionSize"
+    [maxSize]="maxSize"
+    [(page)]="page"
+    [pageSize]="pageSize"
+    [rotate]="rotate"
+    (pageChange)="pageChanged($event)"
+  ></ngb-pagination>
 </div>
