@@ -1,0 +1,61 @@
+<h4>Product Variants</h4>
+<hr>
+<div class="row">
+  <div class="col-6">
+    <div class="row">
+      <form [formGroup]="filterForm" (ngSubmit)="applyFilter()">
+        <div class="input-group mb-3">
+          <input type="text" class="form-control" placeholder="Code" formControlName="code">
+          <span class="input-group-text">Family</span>
+          <select class="form-select" formControlName="productFamily">
+            <ng-container *ngFor="let productFamily of productFamilies">
+              <option></option>
+              <option [value]="productFamily">{{productFamily.name}}</option>
+            </ng-container>
+          </select>
+          <span class="input-group-text">Material</span>
+          <select class="form-select" formControlName="material">
+            <option></option>
+            <option value="T304">{{Material.T304}}</option>
+            <option value="T430">{{Material.T430}}</option>
+            <option value="OTHER">{{Material.OTHER}}</option>
+          </select>
+        </div>
+        <div class="input-group mb-3">
+          <span class="input-group-text">L</span>
+          <input type="number" class="form-control" formControlName="length">
+          <span class="input-group-text">W</span>
+          <input type="number" class="form-control" formControlName="width">
+          <span class="input-group-text">H</span>
+          <input type="number" class="form-control" formControlName="height">
+        </div>
+        <div class="input-group mb-3">
+          <button class="btn btn-success" type="submit">Filter</button>
+          <button class="btn btn-secondary" type="reset" (click)="resetFilter()">Reset</button>
+        </div>
+      </form>
+    </div>
+    <div class="row">
+      <select class="form-select" size="20">
+        <ng-container *ngFor="let variant of filteredProductVariants">
+          <option (click)="selectVariant(variant)">{{variant.code}}</option>
+        </ng-container>
+      </select>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card" *ngIf="selectedProductVariant">
+      <h5 class="card-header">{{selectedProductVariant.productFamily.name}}</h5>
+      <div class="card-body">
+        <h5 class="card-title">{{selectedProductVariant.code}}</h5>
+        <p class="card-text">Material: {{selectedProductVariant.material}}</p>
+        <p class="card-text">Dimensions: {{selectedProductVariant.length}}x{{selectedProductVariant.width}}x{{selectedProductVariant.height}}</p>
+        <p class="card-text">Description: {{selectedProductVariant.description}}</p>
+        <a class="btn btn-primary" (click)="addToOrder()">Add To Order</a>
+      </div>
+      <div class="card-footer text-body-secondary">
+        <p>Price: {{selectedProductVariant.price | currency:'EUR' }}</p>
+      </div>
+    </div>
+  </div>
+</div>

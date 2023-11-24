@@ -1,5 +1,6 @@
 <h2>Finish</h2>
 <hr>
+<ng-container>
 <div class="row row-cols-1 row-cols-md-5 g-5">
   <div class="col" *ngFor="let product of products">
     <div class="card h-100">
@@ -22,6 +23,7 @@
     </div>
   </div>
 </div>
+</ng-container>
 <ngb-pagination
   class="d-flex justify-content-center"
   [collectionSize]="collectionSize"

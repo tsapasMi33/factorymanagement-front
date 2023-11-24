@@ -2,41 +2,49 @@
     padding: 3px;
     font-weight: bold;
     background-color: grey;
+  color: white;
 }
 .PRODUCTION {
     padding: 3px;
     font-weight: bold;
     background-color: blue;
+    color: white;
 }
 .CUT {
     padding: 3px;
     font-weight: bold;
     background-color: blueviolet;
+  color: white;
 }
 .BENT {
     padding: 3px;
     font-weight: bold;
     background-color: palevioletred;
+  color: white;
 }
 .COMBINED {
     padding: 3px;
     font-weight: bold;
-    background-color: yellow;
+    background-color: brown;
+  color: white;
 }
 .WELDED {
     padding: 3px;
     font-weight: bold;
     background-color: red;
+  color: white;
 }
 .ASSEMBLED {
     padding: 3px;
     font-weight: bold;
     background-color: lightskyblue;
+  color: white;
 }
 .FINISHED {
     padding: 3px;
     font-weight: bold;
     background-color: orange;
+  color: white;
 }
 .PACKED {
     padding: 3px;
@@ -48,4 +56,5 @@
     padding: 3px;
     font-weight: bold;
     background-color: green;
+  color: white;
 }

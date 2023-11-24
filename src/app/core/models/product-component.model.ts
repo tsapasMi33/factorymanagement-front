@@ -1,7 +1,7 @@
 import {Material} from "../enums/material.enum";
 import {MaterialType} from "../enums/material-type.enum";
 
-export interface Component {
+export interface ProductComponent {
   id: number;
   name: string;
   type: MaterialType;

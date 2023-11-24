@@ -1,0 +1,66 @@
+<h4>Product Family</h4>
+<hr>
+<div class="row">
+  <div class="input-group mb-3">
+    <button class="btn btn-primary btn" (click)="open(modal)">Create</button>
+  </div>
+</div>
+<div class="row d-flex">
+  <div class="col-8">
+    <select class="form-select" size="10">
+      <ng-container *ngFor="let productFamily of productFamilies">
+        <option [value]="productFamily.id" (click)="selectFamily(productFamily)">{{productFamily.name}}</option>
+      </ng-container>
+    </select>
+  </div>
+  <div class="col-4 align-self-center">
+    <ul class="list-group text-center" *ngIf="selectedProductFamily">
+      <ng-container *ngFor="let step of selectedProductFamily.productionPath.slice(2).slice(0,-2)">
+        <li class="list-group-item" [ngClass]="step">{{step | step}}</li>
+      </ng-container>
+    </ul>
+  </div>
+</div>
+
+<ng-template #modal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Create Family</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <form [formGroup]="productFamilyForm" (ngSubmit)="saveProductFamily(modal)">
+    <div class="modal-body">
+      <div class="mb-3">
+        <label for="name" class="form-label">Family Name</label>
+        <input type="text" class="form-control" id="name" formControlName="name">
+      </div>
+      <button type="button" class="btn btn-primary" style="--bs-btn-bg: blueviolet; --bs-btn-border-color: black"
+              (click)="addStep('CUT')">CUT
+      </button>
+      <button type="button" class="btn btn-primary" style="--bs-btn-bg: palevioletred; --bs-btn-border-color: black"
+              (click)="addStep('BENT')">BEND
+      </button>
+      <button type="button" class="btn btn-primary" style="--bs-btn-bg: brown; --bs-btn-border-color: black"
+              (click)="addStep('COMBINED')">COMBINE
+      </button>
+      <button type="button" class="btn btn-primary" style="--bs-btn-bg: red; --bs-btn-border-color: black"
+              (click)="addStep('WELDED')">WELD
+      </button>
+      <button type="button" class="btn btn-primary" style="--bs-btn-bg: lightskyblue; --bs-btn-border-color: black"
+              (click)="addStep('ASSEMBLED')">ASSEMBLE
+      </button>
+      <button type="button" class="btn btn-primary" style="--bs-btn-bg: orange; --bs-btn-border-color: black"
+              (click)="addStep('FINISHED')">FINISH
+      </button>
+      <ng-container *ngFor="let step of formSteps.controls; index as i">
+        <p style="display: inline-block">
+          <span class="badge text-bg-secondary">{{step.value}}
+            <button type="button" class="btn btn-secondary" (click)="formSteps.removeAt(i)">x</button>
+          </span>
+        </p>
+      </ng-container>
+    </div>
+    <div class="modal-footer">
+      <button type="submit" class="btn btn-outline-dark">Save</button>
+    </div>
+  </form>
+</ng-template>

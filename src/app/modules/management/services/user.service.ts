@@ -17,8 +17,9 @@ export class UserService {
   }
 
 
-  updateUser(id:number, user: any) {
-    return this.http.put('http://localhost:8080/user/' + id, {user}) // always empty body
+  updateUser(id:number, user: User) {
+    console.log(user)
+    return this.http.put('http://localhost:8080/user/' + id, user)
   }
 
   createUser(user: any) {

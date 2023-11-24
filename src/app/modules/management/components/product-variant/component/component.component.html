@@ -1,0 +1,60 @@
+<h4>Components</h4>
+<hr>
+<form [formGroup]="componentForm">
+  <div class="row">
+    <div class="input-group mb-3">
+      <input type="text" class="form-control" placeholder="Name" formControlName="name">
+      <span class="input-group-text">Type</span>
+      <select class="form-select w-25" formControlName="type">
+        <option value="PLATE">{{MaterialType.PLATE}}</option>
+        <option value="TUBE">{{MaterialType.TUBE}}</option>
+        <option value="FINISHED_PRODUCT">{{MaterialType.FINISHED_PRODUCT}}</option>
+        <option value="L">{{MaterialType.L}}</option>
+        <option value="OMEGA">{{MaterialType.OMEGA}}</option>
+        <option value="Z">{{MaterialType.Z}}</option>
+      </select>
+      <span class="input-group-text">Material</span>
+      <select class="form-select" formControlName="material">
+        <option value="T304">{{Material.T304}}</option>
+        <option value="T430">{{Material.T430}}</option>
+        <option value="OTHER">{{Material.OTHER}}</option>
+      </select>
+    </div>
+  </div>
+  <div class="row d-flex">
+    <div class="col-4">
+      <select class="form-select" size="10">
+        <ng-container *ngFor="let component of filteredComponents">
+          <option [value]="component.id" (click)="selectComponent(component)">{{component.name}}</option>
+        </ng-container>
+      </select>
+    </div>
+    <div class="col-8">
+      <div class="row">
+        <div class="col-12">
+          <div class="input-group mb-3">
+            <span class="input-group-text">Thickness [<sup>mm</sup>&frasl;<sub>10</sub>]</span>
+            <input type="number" class="form-control" formControlName="thickness">
+            <span class="input-group-text">Length [mm]</span>
+            <input type="number" class="form-control" formControlName="length">
+            <span class="input-group-text">Width [mm]</span>
+            <input type="number" class="form-control" formControlName="width">
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="input-group mb-3">
+            <span class="input-group-text">Price</span>
+            <input type="number" class="form-control" formControlName="price">
+            <button class="btn btn-success btn-sm" (click)="applyFilter()">Filter</button>
+            <button class="btn btn-secondary btn-sm" (click)="reset()">Reset</button>
+            <button class="btn btn-primary btn-sm" (click)="create()">Create</button>
+            <button class="btn btn-danger btn-sm" (click)="update()">Update</button>
+          </div>
+        </div>
+      </div>
+      <div class="row text-center">
+      <button class="btn btn-lg btn-primary" (click)="addToProduct()">Add To Product</button>
+      </div>
+    </div>
+  </div>
+</form>

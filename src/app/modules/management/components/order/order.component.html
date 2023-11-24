@@ -1,1 +1,53 @@
-<p>order works!</p>
+<h2>Order</h2>
+<hr>
+<div class="row">
+  <div class="col-7">
+    <app-product-variant-list (variantSelectedEmitter)="addProduct($event)"></app-product-variant-list>
+  </div>
+  <div class="col-5">
+    <h4>New Order</h4>
+    <hr>
+    <form [formGroup]="orderForm" (ngSubmit)="createOrder()">
+    <div class="input-group mb-3">
+      <span class="input-group-text">Client</span>
+      <ng-container [formGroup]="client">
+      <select class="form-select" formControlName="id">
+        <ng-container *ngFor="let client of clients">
+          <option [value]="client.id">{{client.name}} {{client.companyType}}</option>
+        </ng-container>
+      </select>
+      </ng-container>
+      <span class="input-group-text">Delivery Preference</span>
+      <select class="form-select" formControlName="deliveryPreference">
+        <option value="OURS">Ours</option>
+        <option value="CLIENT">Client</option>
+        <option value="TRANSPORTER_OURS">Transporter Ours</option>
+        <option value="TRANSPORTER_CLIENT">Transporter Client</option>
+      </select>
+    </div>
+    <div class="input-group mb-3">
+      <span class="input-group-text" id="basic-addon1">Planned Delivery Date</span>
+      <input type="date" class="form-control" formControlName="plannedDeliveryDate">
+      <button class="btn btn-outline-success" type="submit">Create Order</button>
+    </div>
+    <h6>Products</h6>
+    <hr>
+      <ng-container formArrayName="products">
+        <ng-container *ngFor="let orderLine of productsArray.controls; let i = index">
+          <form [formGroup]="getControl(orderLine)">
+          <div class="input-group mb-3">
+            <input type="text" class="form-control" value="{{(orderLine.get('variant')?.value).code}}" disabled>
+            <span class="input-group-text">Qty</span>
+            <input type="number" class="form-control" formControlName="quantity">
+            <button class="btn btn-outline-danger" (click)="productsArray.removeAt(i)">x</button>
+          </div>
+          <div class="input-group mb-3">
+            <span class="input-group-text">Comments</span>
+            <textarea class="form-control" formControlName="comments"></textarea>
+          </div>
+          </form>
+        </ng-container>
+      </ng-container>
+    </form>
+  </div>
+</div>

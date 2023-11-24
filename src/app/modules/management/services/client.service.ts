@@ -16,7 +16,7 @@ export class ClientService {
   }
 
   updateClient(id:number, client: any) {
-    return this.http.put('http://localhost:8080/client/' + id, {client}) // always empty body
+    return this.http.put('http://localhost:8080/client/' + id, client) // always empty body
   }
 
   createClient(client: any) {

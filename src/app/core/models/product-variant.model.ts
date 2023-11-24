@@ -1,6 +1,6 @@
 import {Material} from "../enums/material.enum";
 import {ProductFamily} from "./product-family.model";
-import {Component} from "./component.model";
+import {ProductComponent} from "./product-component.model";
 
 export interface ProductVariant {
   id: number;
@@ -12,5 +12,5 @@ export interface ProductVariant {
   price: number;
   description: string;
   productFamily: ProductFamily;
-  components: Component[];
+  components: ProductComponent[];
 }

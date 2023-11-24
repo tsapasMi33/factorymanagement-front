@@ -20,28 +20,31 @@ import {NgbPagination} from "@ng-bootstrap/ng-bootstrap";
 
 
 @NgModule({
-  declarations: [
-    PlanningComponent,
-    ProductionComponent,
-    CutComponent,
-    BendComponent,
-    CombineComponent,
-    WeldComponent,
-    AssembleComponent,
-    FinishComponent,
-    PackComponent,
-    ShipComponent,
-    StepPipe,
-  ],
+    declarations: [
+        PlanningComponent,
+        ProductionComponent,
+        CutComponent,
+        BendComponent,
+        CombineComponent,
+        WeldComponent,
+        AssembleComponent,
+        FinishComponent,
+        PackComponent,
+        ShipComponent,
+        StepPipe,
+    ],
     imports: [
         CommonModule,
         ManufactureRoutingModule,
         ReactiveFormsModule,
         NgbPagination,
     ],
-  providers: [
-    ProductService,
-    BatchService
-  ]
+    exports: [
+        StepPipe
+    ],
+    providers: [
+        ProductService,
+        BatchService
+    ]
 })
 export class ManufactureModule { }
