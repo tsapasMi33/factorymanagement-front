@@ -14,7 +14,7 @@ import { PackComponent } from './components/pack/pack.component';
 import { ShipComponent } from './components/ship/ship.component';
 import {StepPipe} from "../../core/pipes/step.pipe";
 import {ProductService} from "./services/product.service";
-import {ReactiveFormsModule} from "@angular/forms";
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {BatchService} from "./services/batch.service";
 import {NgbPagination} from "@ng-bootstrap/ng-bootstrap";
 
@@ -38,6 +38,7 @@ import {NgbPagination} from "@ng-bootstrap/ng-bootstrap";
         ManufactureRoutingModule,
         ReactiveFormsModule,
         NgbPagination,
+        FormsModule,
     ],
     exports: [
         StepPipe

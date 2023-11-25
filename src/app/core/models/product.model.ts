@@ -12,13 +12,15 @@ export interface Product {
   packetId: number | null;
   packetCode: string | null;
   order: Order;
+  code: string;
 }
 
 interface Order {
   createdDate: Date;
   id: number;
-  plannedDeliveryDate: Date,
-  client: Client
+  plannedDeliveryDate: Date;
+  code: string;
+  client: Client;
 }
 
 interface Client {

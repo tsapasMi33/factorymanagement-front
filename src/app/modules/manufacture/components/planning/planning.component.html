@@ -5,17 +5,6 @@
   <table class="table table-hover">
     <thead>
     <tr class="table-dark">
-      <th scope="col">Step</th>
-      <th scope="col">Client</th>
-      <th scope="col">Product Family</th>
-      <th scope="col">Product Variant</th>
-      <th scope="col">Batch</th>
-      <th scope="col">Packet</th>
-      <th scope="col">Order Date</th>
-      <th scope="col">Delivery Date</th>
-      <th scope="col"></th>
-    </tr>
-    <tr class="table-dark">
       <th scope="col">
         <select class="form-select-sm" formControlName="currentStep">
           <option [value]=null selected>All</option>
@@ -72,9 +61,22 @@
       <th scope="col">
         <input class="form-control form-control-sm" type="date" formControlName="deliveryDate">
       </th>
+      <th></th>
       <th scope="col">
         <button class="btn btn-primary" type="submit">Apply</button>
       </th>
+    </tr>
+    <tr class="table-dark">
+      <th scope="col">Step</th>
+      <th scope="col">Client</th>
+      <th scope="col">Product Family</th>
+      <th scope="col">Product Variant</th>
+      <th scope="col">Batch</th>
+      <th scope="col">Packet</th>
+      <th scope="col">Order Date</th>
+      <th scope="col">Delivery Date</th>
+      <th scope="col">Order</th>
+      <th scope="col">Code</th>
     </tr>
     </thead>
     <tbody>
@@ -87,7 +89,8 @@
       <td>{{product.packetCode}}</td>
       <td>{{product.order.createdDate | date: 'shortDate'}}</td>
       <td>{{product.order.plannedDeliveryDate | date: 'shortDate'}}</td>
-      <td>{{product.id}}</td>
+      <td>{{product.order.code}}</td>
+      <td>{{product.code}}</td>
     </tr>
     </tbody>
   </table>

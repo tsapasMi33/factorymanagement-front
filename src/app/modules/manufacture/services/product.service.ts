@@ -3,7 +3,6 @@ import {HttpClient, HttpParams} from "@angular/common/http";
 import {Product} from "../../../core/models/product.model";
 import {Step} from "../../../core/enums/step.enum";
 import {Page} from "../../../core/models/Page.model";
-import {Batch} from "../../../core/models/batch.model";
 
 
 interface Filter {

@@ -5,18 +5,7 @@
     <table class="table table-hover">
       <thead>
       <tr class="table-dark">
-        <th scope="col"><button class="btn btn-outline-success" type="submit">Create</button></th>
-        <th scope="col">Client</th>
-        <th scope="col">Product Family</th>
-        <th scope="col">Product Variant</th>
-        <th scope="col">Order Date</th>
-        <th scope="col">Delivery Date</th>
-        <th scope="col"></th>
-      </tr>
-      <tr class="table-dark">
-        <th scope="col">
-          Batch
-        </th>
+        <th scope="col" rowspan="2"><button class="btn btn-outline-success" type="submit">Create<br>Batch</button></th>
         <th scope="col">
           <select class="form-select-sm" formControlName="clientId">
             <option selected>All</option>
@@ -46,6 +35,14 @@
           <button class="btn btn-primary" type="button" (click)="onFilter()">Apply</button>
         </th>
       </tr>
+      <tr class="table-dark">
+        <th scope="col">Client</th>
+        <th scope="col">Product Family</th>
+        <th scope="col">Product Variant</th>
+        <th scope="col">Order Date</th>
+        <th scope="col">Delivery Date</th>
+        <th scope="col">Order</th>
+      </tr>
       </thead>
       <tbody>
       <tr *ngFor="let product of products">
@@ -55,7 +52,7 @@
         <td>{{product.variant.code}}</td>
         <td>{{product.order.createdDate | date: 'shortDate'}}</td>
         <td>{{product.order.plannedDeliveryDate | date: 'shortDate'}}</td>
-        <td>{{product.id}}</td>
+        <td>{{product.order.code}}</td>
       </tr>
       </tbody>
     </table>
