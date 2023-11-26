@@ -1,8 +1,9 @@
 import {Component, TemplateRef} from '@angular/core';
 import {Client} from "../../../../core/models/client.model";
-import {FormControl, FormGroup} from "@angular/forms";
+import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
 import {ClientService} from "../../services/client.service";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {BehaviorSubject} from "rxjs";
 
 @Component({
   selector: 'app-client',
@@ -10,12 +11,16 @@ import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
   styleUrls: ['./client.component.css']
 })
 export class ClientComponent {
-  clients!: Client[]
+  clients: Client[] = new Array(20)
   clientForm!: FormGroup;
   create = false;
   selectedClientId: number = 0;
+  pageLoading = false;
+  clientSaving = false;
 
-  constructor(private clientService$: ClientService, private modalService: NgbModal) {
+  constructor(private clientService$: ClientService,
+              private modalService: NgbModal,
+              private fb: FormBuilder) {
   }
 
   ngOnInit(): void {
@@ -23,44 +28,61 @@ export class ClientComponent {
   }
 
   load() {
+    this.pageLoading = true;
+    this.clientForm = this.generateClientForm();
     this.clientService$.getClients().subscribe({
-      next: value => this.clients = value,
-      error: err => console.error(err)
+      next: value => {
+        this.clients = value
+        this.pageLoading = false;
+      },
+      error: err => {
+        console.error(err);
+        this.pageLoading = false;
+      }
     })
   }
-
 
   createClient(modal: TemplateRef<any>) {
     this.create = true
     this.selectedClientId = 0;
-    this.generateClientForm({name: "", companyType: "", address: {street: "", number: "", city: "", cp: "", country: ""}, discountPercentage : 0, id: 0})
     this.open(modal);
   }
 
-  getClient(id: number, content: TemplateRef<any>) {
+  getClient(id: number, modal: TemplateRef<any>) {
     this.create = false;
     this.selectedClientId = id
     this.clientService$.getClient(id).subscribe({
       next: value => {
-        this.generateClientForm(value)
-        this.open(content)
+        this.fillClientForm(value)
+        this.open(modal)
       },
       error: err => console.error(err)
     })
   }
 
   saveClient(modal: any) {
+    this.clientSaving = true;
     if (this.create) {
       this.clientService$.createClient(this.clientForm.value).subscribe({
-        next: value => this.load(),
-        error: err => console.error(err)
+        next: value => {
+          this.load();
+          this.clientSaving = false;
+        },
+        error: err => {
+          console.error(err);
+          this.clientSaving = false
+        }
       })
     } else {
       this.clientService$.updateClient(this.selectedClientId ,this.clientForm.value).subscribe({
         next: value => {
           this.load();
+          this.clientSaving = false;
         },
-        error: err => console.error(err)
+        error: err => {
+          console.error(err);
+          this.clientSaving = false;
+        }
       })
     }
     modal.close()
@@ -75,27 +97,34 @@ export class ClientComponent {
     modal.close();
   }
 
-  open(content: TemplateRef<any>) {
-    this.modalService.open(content, { ariaLabelledBy: 'modal-basic-title' })
+  open(modal: TemplateRef<any>) {
+    this.modalService.open(modal)
   }
 
-  generateClientForm(client: Client) {
-    this.clientForm = new FormGroup(
-      {
-        name: new FormControl(client.name),
-        companyType: new FormControl(client.companyType),
-        discountPercentage: new FormControl(client.discountPercentage),
-        address: new FormGroup(
-          {
-            street: new FormControl(client.address.street),
-            number: new FormControl(client.address.number),
-            cp: new FormControl(client.address.cp),
-            country: new FormControl(client.address.country),
-            city: new FormControl(client.address.city),
-          }
-        )
-      }
-    )
+  generateClientForm() {
+    return this.fb.group({
+      name: this.fb.control(null, {validators:[Validators.required]}),
+      companyType:[],
+      discountPercentage: this.fb.control(null, {validators: [Validators.min(0), Validators.max(60)]}),
+      address: this.fb.group({
+        street:[],
+        number:[],
+        cp:[],
+        city:[],
+        country:[],
+      })
+    });
   }
 
+  private fillClientForm(client: Client) {
+    this.clientForm.get('name')?.setValue(client.name);
+    this.clientForm.get('companyType')?.setValue(client.companyType);
+    this.clientForm.get('discountPercentage')?.setValue(client.discountPercentage);
+    let address = this.clientForm.get('address') as FormArray;
+    address.get('street')?.setValue(client.address.street);
+    address.get('number')?.setValue(client.address.number);
+    address.get('cp')?.setValue(client.address.cp);
+    address.get('city')?.setValue(client.address.city);
+    address.get('country')?.setValue(client.address.country);
+  }
 }

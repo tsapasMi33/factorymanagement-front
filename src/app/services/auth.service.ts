@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {HttpClient} from "@angular/common/http";
+import {HttpClient, HttpErrorResponse} from "@angular/common/http";
 import {BehaviorSubject, map, Observable, tap} from "rxjs";
 import {AuthDto} from "../core/models/auth.model";
 
@@ -16,8 +16,7 @@ export class AuthService {
   connect(loginForm:{'username': string, 'password': string}) {
     return this.http.post<AuthDto>('http://localhost:8080/user/login',loginForm).pipe(
       tap({
-        next: auth => this.connectedUser = auth,
-        error: err => console.error(err)
+        next: auth => this.connectedUser = auth
       })
     );
   }

@@ -49,9 +49,9 @@ export class ComponentComponent implements OnInit{
       this.filteredComponents = this.components
         .filter(c => c.name.toLowerCase().includes(this.componentForm.get("name")?.value))
     }
-    if (this.componentForm.get("materialType")?.value != null && this.componentForm.get("materialType")?.value != "") {
+    if (this.componentForm.get("type")?.value != null && this.componentForm.get("type")?.value != "") {
       this.filteredComponents = this.components
-        .filter(c => c.type === this.componentForm.get("materialType")?.value)
+        .filter(c => c.type === this.componentForm.get("type")?.value)
     }
     if (this.componentForm.get("material")?.value != null && this.componentForm.get("material")?.value != "") {
       this.filteredComponents = this.components

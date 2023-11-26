@@ -8,18 +8,36 @@
             <div class="col-md-9 col-lg-8 mx-auto">
               <h3 class="login-heading mb-4">Please Login</h3>
 
+              <ng-container *ngIf="(errorMessage | async) !== ''">
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                  {{errorMessage | async}}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+              </ng-container>
+
               <form [formGroup]="form" (ngSubmit)="onSubmit()">
                 <div class="form-floating mb-3">
-                  <input type="text" class="form-control" id="floatingInput" placeholder="Username" formControlName="username">
+                  <input type="text" class="form-control" id="floatingInput" placeholder="Username"
+                         formControlName="username">
                   <label for="floatingInput">Username</label>
                 </div>
                 <div class="form-floating mb-3">
-                  <input type="password" class="form-control" id="floatingPassword" placeholder="Password" formControlName="password">
+                  <input type="password" class="form-control" id="floatingPassword" placeholder="Password"
+                         formControlName="password">
                   <label for="floatingPassword">Password</label>
+                <div class="form-text" id="basic-addon4">Password must be exactly 6 characters long.</div>
                 </div>
 
                 <div class="d-grid">
-                  <button class="btn btn-lg btn-primary btn-login text-uppercase fw-bold mb-2" type="submit">Sign in</button>
+                  <button class="btn btn-lg btn-primary btn-login text-uppercase fw-bold mb-2" type="submit"
+                          *ngIf="!loading; else wait" [disabled]="form.invalid">Sign in
+                  </button>
+                  <ng-template #wait>
+                    <button class="btn btn-primary btn-login text-uppercase fw-bold mb-2" type="button" disabled>
+                      <span class="spinner-grow spinner-grow-sm" aria-hidden="true"></span>
+                      <span role="status">Please Wait...</span>
+                    </button>
+                  </ng-template>
                 </div>
 
               </form>

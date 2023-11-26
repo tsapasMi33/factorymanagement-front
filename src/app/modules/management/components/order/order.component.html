@@ -10,7 +10,7 @@
     <form [formGroup]="orderForm" (ngSubmit)="createOrder()">
     <div class="input-group mb-3">
       <span class="input-group-text">Client</span>
-      <ng-container [formGroup]="client">
+      <ng-container [formGroup]="clientGroup">
       <select class="form-select" formControlName="id">
         <ng-container *ngFor="let client of clients">
           <option [value]="client.id">{{client.name}} {{client.companyType}}</option>

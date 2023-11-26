@@ -18,7 +18,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     FooterComponent,
     HeaderComponent,
     LoginComponent,
-    Page404Component
+    Page404Component,
   ],
   imports: [
     BrowserModule,
