@@ -23,7 +23,20 @@
             <option value="T430">{{Material.T430}}</option>
             <option value="OTHER">{{Material.OTHER}}</option>
           </select>
-          <span class="input-group-text">Variant Identifier</span>
+          <ng-template #infoVariantIdentifier>
+            <p>Alignment<br>
+              C: central, L: Left, R: Right
+            </p>
+            <p>
+            Sub tablets<br>
+              NST: No, 1ST: 1, 2ST: 2
+            </p>
+            <p>
+            Washtable<br>
+              S: Single, D: Double
+            </p>
+          </ng-template>
+          <span class="input-group-text" [ngbTooltip]="infoVariantIdentifier">Variant Identifier</span>
           <input type="text" class="form-control" formControlName="variantIdentifier">
           <span class="input-group-text">Price</span>
           <input type="number" class="form-control" formControlName="price">
@@ -56,7 +69,7 @@
     </div>
     <div class="row">
       <div class="col-12 text-end">
-        <button class="btn btn-lg btn-outline-success" (click)="create()">Create</button>
+        <button class="btn btn-lg btn-outline-success" [disabled]="productVariantForm.invalid" (click)="create()">Create</button>
       </div>
     </div>
   </div>

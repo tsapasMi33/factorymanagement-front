@@ -16,6 +16,7 @@ import {ManufactureModule} from "../manufacture/manufacture.module";
 import {ComponentService} from "./services/component.service";
 import { ProductVariantListComponent } from './components/order/product-variant-list/product-variant-list.component';
 import {OrderService} from "./services/order.service";
+import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 
 
 @NgModule({
@@ -28,12 +29,13 @@ import {OrderService} from "./services/order.service";
     ComponentComponent,
     ProductVariantListComponent,
   ],
-  imports: [
-    CommonModule,
-    ManagementRoutingModule,
-    ReactiveFormsModule,
-    ManufactureModule
-  ],
+    imports: [
+        CommonModule,
+        ManagementRoutingModule,
+        ReactiveFormsModule,
+        ManufactureModule,
+        NgbTooltip
+    ],
   providers: [
     ClientService,
     UserService,

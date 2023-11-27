@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import {Material} from "../../../../core/enums/material.enum";
-import {FormArray, FormControl, FormControlName, FormGroup} from "@angular/forms";
+import {FormArray, FormBuilder, FormControl, FormControlName, FormGroup, Validators} from "@angular/forms";
 import {ProductVariantService} from "../../services/product-variant.service";
 import {ProductFamily} from "../../../../core/models/product-family.model";
 import {ProductComponent} from "../../../../core/models/product-component.model";
@@ -14,18 +14,9 @@ export class ProductVariantComponent {
 
   productVariantForm: FormGroup;
 
-  constructor(private productVariantService$: ProductVariantService) {
-    this.productVariantForm = new FormGroup({
-      material: new FormControl(),
-      variantIdentifier: new FormControl(),
-      width: new FormControl(),
-      length: new FormControl(),
-      height: new FormControl(),
-      price: new FormControl(),
-      description: new FormControl(),
-      productFamily: new FormControl(),
-      components: new FormArray([])
-    })
+  constructor(private productVariantService$: ProductVariantService,
+              private fb: FormBuilder) {
+    this.productVariantForm = this.generateForm();
   }
 
     protected readonly Material = Material;
@@ -47,6 +38,20 @@ export class ProductVariantComponent {
   create() {
     this.productVariantService$.createProductVariant(this.productVariantForm.value).subscribe({
       next: value => this.productVariantForm.reset()
+    })
+  }
+
+  generateForm() {
+    return this.fb.group({
+      material: this.fb.control(null, {validators: Validators.required,}),
+      variantIdentifier: this.fb.control(null, {validators: [Validators.required, Validators.minLength(1)]}),
+      width:[],
+      length:[],
+      height:[],
+      price: this.fb.control(null, {validators: [Validators.min(0)]}),
+      description:[],
+      productFamily: this.fb.control(null, {validators: [Validators.required]}),
+      components: this.fb.array([])
     })
   }
 }

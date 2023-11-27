@@ -3,8 +3,7 @@ import {ProductService} from "../../services/product.service";
 import {Product} from "../../../../core/models/product.model";
 import {ProductFamily} from "../../../../core/models/product-family.model";
 import {FormControl, FormGroup} from "@angular/forms";
-import {Observable} from "rxjs";
-import {Page} from "../../../../core/models/Page.model";
+import {Client} from "../../../../core/models/client.model";
 
 @Component({
     selector: 'app-planning',
@@ -13,7 +12,7 @@ import {Page} from "../../../../core/models/Page.model";
 })
 export class PlanningComponent implements OnInit {
   public products!: Product[];
-  public clientsPresent!: { id: number, name: string }[];
+  public clientsPresent!: Client[];
   public productFamiliesPresent!: ProductFamily[];
   public batchesPresent!: {id: number | null, code: string | null}[];
   public packetsPresent!: {id: number | null, code: string | null}[];
@@ -27,7 +26,7 @@ export class PlanningComponent implements OnInit {
 
   filterForm: FormGroup;
 
-  constructor(private planningService$: ProductService) {
+  constructor(private productService$: ProductService) {
     this.filterForm = new FormGroup({
       currentStep: new FormControl(null),
       clientId: new FormControl(null),
@@ -50,10 +49,9 @@ export class PlanningComponent implements OnInit {
   }
 
   load(page: number){
-    this.planningService$.getProductsPage(page,{...this.filterForm.value}).subscribe({
+    this.productService$.getProductsPage(page,{...this.filterForm.value}).subscribe({
       next: value => {
         this.products = value.content;
-        this.clientsPresent = [...new Map(this.products.map(value => [value.order.client.id, value.order.client])).values()];
         this.productFamiliesPresent = [...new Map(this.products.map(value => [value.variant.productFamily.id,value.variant.productFamily])).values()];
         this.batchesPresent = [...new Map(this.products.map(value => [value.batchId, { id: value.batchId, code: value.batchCode }])).values()]
           .filter(value => value.id !== null);
@@ -67,9 +65,20 @@ export class PlanningComponent implements OnInit {
         this.totalPages = value.totalPages;
       }
     });
+    this.productService$.getActiveClients().subscribe({
+      next: value => {
+        this.clientsPresent = value
+      }
+    })
   }
 
   public pageChanged(event: any) {
     this.load(event);
+  }
+
+  archiveAll() {
+    this.productService$.archiveAll().subscribe({
+      next: () => this.load(1)
+    })
   }
 }

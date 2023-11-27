@@ -51,6 +51,7 @@
       <button type="button" class="btn btn-primary" style="--bs-btn-bg: orange; --bs-btn-border-color: black"
               (click)="addStep('FINISHED')">FINISH
       </button>
+      <p style="font-size: 0.7rem">Encoded, Production and Packed, Sent must not be defined.</p>
       <ng-container *ngFor="let step of formSteps.controls; index as i">
         <p style="display: inline-block">
           <span class="badge text-bg-secondary">{{step.value}}

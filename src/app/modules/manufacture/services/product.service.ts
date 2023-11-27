@@ -3,6 +3,7 @@ import {HttpClient, HttpParams} from "@angular/common/http";
 import {Product} from "../../../core/models/product.model";
 import {Step} from "../../../core/enums/step.enum";
 import {Page} from "../../../core/models/Page.model";
+import {Client} from "../../../core/models/client.model";
 
 
 interface Filter {
@@ -48,5 +49,13 @@ export class ProductService {
     let params = new HttpParams();
     params = params.append('step', step)
     return this.http.patch<Product>('http://localhost:8080/product/' + productId + '/' + action, null,{params})
+  }
+
+  getActiveClients() {
+    return this.http.get<Client[]>('http://localhost:8080/client/all-active');
+  }
+
+  archiveAll() {
+    return this.http.patch('http://localhost:8080/product/archive', null)
   }
 }
