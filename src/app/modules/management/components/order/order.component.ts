@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import {Material} from "../../../../core/enums/material.enum";
-import {AbstractControl, FormArray, FormBuilder, FormGroup} from "@angular/forms";
+import {AbstractControl, FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {OrderService} from "../../services/order.service";
 import {ClientService} from "../../services/client.service";
 import {Client} from "../../../../core/models/client.model";
@@ -59,7 +59,7 @@ export class OrderComponent {
 
   private generateOrderForm() {
     return this.fb.group({
-      plannedDeliveryDate: [null],
+      plannedDeliveryDate: [null,[Validators.required]],
       deliveryPreference: [null],
       client: this.fb.group({
         id: [null]

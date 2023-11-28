@@ -25,4 +25,7 @@ export class BatchService {
     params = params.append('step', step)
     return this.http.patch<Batch>('http://localhost:8080/batch/' + batchId + '/' + action, null,{params})
   }
+
+
+
 }

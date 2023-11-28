@@ -1,52 +1,105 @@
 <h2>Cut</h2>
 <hr>
 <div>
-<ng-container *ngFor="let batch of batches">
-  <div class="card">
-    <div class="card-header">
-      Batch #: {{batch.code}}
-    </div>
-    <div class="card-body">
-      <h5 class="card-title">Plates to be cut</h5>
-      <table class="table">
-        <thead>
-        <tr>
-          <th scope="col">Part</th>
-          <th scope="col">Product</th>
-          <th scope="col">Code</th>
-          <th scope="col">Material</th>
-          <th scope="col">Thickness</th>
-          <th scope="col">Width</th>
-          <th scope="col">Length</th>
-        </tr>
-        </thead>
-        <tbody>
-
-        <ng-container *ngFor="let product of batch.products">
-          <ng-container *ngFor="let component of product.variant.components">
-            <tr>
-              <td>{{component.name}}</td>
-              <td>{{product.variant.productFamily.name}}</td>
-              <td>{{product.variant.code}}</td>
-              <td>{{component.material}}</td>
-              <td>{{component.thickness}}</td>
-              <td>{{component.width}}</td>
-              <td>{{component.length}}</td>
-            </tr>
+  <ng-container *ngFor="let batch of batches">
+    <div class="card" *ngIf="!loading; else placeholder"
+         [ngClass]="{'text-bg-success': isBatchOngoing(batch), 'text-bg-warning': isBatchPaused(batch)}"
+    >
+      <div class="card-header">
+        Batch #: {{batch.code}}
+      </div>
+      <div class="card-body">
+        <h5 class="card-title">Plates to be cut</h5>
+        <table class="table" [ngClass]="{'table-success': isBatchOngoing(batch), 'table-warning': isBatchPaused(batch)}">
+          <thead>
+          <tr>
+            <th scope="col">Part</th>
+            <th scope="col">Product</th>
+            <th scope="col">Code</th>
+            <th scope="col">Material</th>
+            <th scope="col">Thickness</th>
+            <th scope="col">Width</th>
+            <th scope="col">Length</th>
+          </tr>
+          </thead>
+          <tbody>
+          <ng-container *ngFor="let product of batch.products">
+            <ng-container *ngFor="let component of product.variant.components">
+              <tr>
+                <td>{{component.name}}</td>
+                <td>{{product.variant.productFamily.name}}</td>
+                <td>{{product.variant.code}}</td>
+                <td>{{component.material}}</td>
+                <td>{{component.thickness}}</td>
+                <td>{{component.width}}</td>
+                <td>{{component.length}}</td>
+              </tr>
+            </ng-container>
           </ng-container>
-        </ng-container>
-        </tbody>
-      </table>
-    </div>
+          </tbody>
+        </table>
+        <p *ngIf="isBatchOngoing(batch)">by: {{getCurrentUser(batch)}}</p>
+      </div>
       <div class="card-footer text-center">
         <div class="btn-group" role="group">
-          <button type="button" class="btn btn-success" (click)="onStartJob(batch.id)">&#9658;</button>
-          <button type="button" class="btn btn-warning" (click)="onPauseJob(batch.id)">&#10074;&#10074;</button>
-          <button type="button" class="btn btn-danger" (click)="onFinishJob(batch.id)">&#9724;</button>
+          <button type="button" class="btn btn-success" (click)="onStartJob(batch.id)" [disabled]="isBatchOngoing(batch)">&#9658;</button>
+          <button type="button" class="btn btn-warning" (click)="onPauseJob(batch.id)" [disabled]="isBatchPaused(batch) || !isBatchOngoing(batch)">&#10074;&#10074;</button>
+          <button type="button" class="btn btn-danger" (click)="onFinishJob(batch.id)" [disabled]="!isBatchOngoing(batch) || isBatchPaused(batch)">&#9724;</button>
         </div>
       </div>
-  </div>
-</ng-container>
+    </div>
+
+    <ng-template #placeholder>
+      <div class="card">
+        <div class="card-header">
+          Batch #: <span class="placeholder col-2"></span>
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">Plates to be cut</h5>
+          <table class="table">
+            <thead>
+            <tr>
+              <th scope="col">Part</th>
+              <th scope="col">Product</th>
+              <th scope="col">Code</th>
+              <th scope="col">Material</th>
+              <th scope="col">Thickness</th>
+              <th scope="col">Width</th>
+              <th scope="col">Length</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td colspan="7"><span class="placeholder col-12"></span></td>
+            </tr>
+            <tr>
+              <td colspan="7"><span class="placeholder col-12"></span></td>
+            </tr>
+            <tr>
+              <td colspan="7"><span class="placeholder col-12"></span></td>
+            </tr>
+            <tr>
+              <td colspan="7"><span class="placeholder col-12"></span></td>
+            </tr>
+            <tr>
+              <td colspan="7"><span class="placeholder col-12"></span></td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card-footer text-center">
+          <div class="btn-group" role="group">
+            <button type="button" class="btn btn-success" disabled>&#9658;</button>
+            <button type="button" class="btn btn-warning" disabled>&#10074;&#10074;</button>
+            <button type="button" class="btn btn-danger" disabled>&#9724;</button>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+
+  </ng-container>
+
+
   <ngb-pagination
     class="d-flex justify-content-center"
     [collectionSize]="collectionSize"

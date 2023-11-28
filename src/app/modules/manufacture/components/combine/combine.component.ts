@@ -8,7 +8,7 @@ import {BatchService} from "../../services/batch.service";
   styleUrls: ['./combine.component.css']
 })
 export class CombineComponent {
-  public batches!: Batch[];
+  public batches: Batch[] = new Array(5);
 
   public  collectionSize!: number;
   public page!: number;
@@ -17,44 +17,69 @@ export class CombineComponent {
   public maxSize=15;
   public rotate= true;
 
+  public loading = false;
+
   constructor(private batchService$: BatchService) {
   }
 
   ngOnInit(): void {
-    this.load(1)
+    this.loadContent(1)
   }
 
-  load(page: number) {
+  loadContent(page: number) {
+    this.loading = true
     this.batchService$.getBatchesFor(page, "COMBINED").subscribe({
       next: value => {
-        this.batches = value.content;
-
+        this.batches = value.content
+        this.batches.forEach(b => b.products.forEach(p => p.variant.components = p.variant.components.filter(c => c.type === 'PLATE')));
         this.collectionSize = value.totalElements;
         this.page = value.number + 1;
         this.pageSize = value.size;
         this.totalPages = value.totalPages;
+        this.loading = false;
       },
-      error: err => console.error(err)
+      error: err => {
+        this.loading = false;
+        console.error(err);
+      }
     })
   }
 
   onStartJob(id: number) {
-    this.batchService$.doJob("COMBINED", id, 'start').subscribe();
+    this.batchService$.doJob("COMBINED", id, 'start').subscribe({
+      next: () => this.loadContent(1)
+    });
   }
 
   onPauseJob(id: number) {
-    this.batchService$.doJob("COMBINED", id, 'pause').subscribe();
+    this.batchService$.doJob("COMBINED", id, 'pause').subscribe({
+      next: () => this.loadContent(1)
+    });
   }
 
   onFinishJob(id: number) {
     this.batchService$.doJob("COMBINED", id, 'finish').subscribe({
-      next: response => this.load(this.page),
+      next: response => this.loadContent(this.page),
       error: err => {console.log(err)}
     });
 
   }
 
   public pageChanged(event: any) {
-    this.load(event);
+    this.loadContent(event);
+  }
+
+  isBatchOngoing(batch: Batch) {
+    let status: boolean | undefined = batch.products[0].steps.filter(s => s.step === 'COMBINED')[0]?.paused;
+    return status === false
+  }
+
+  isBatchPaused(batch: Batch) {
+    let status: boolean | undefined = batch.products[0].steps.filter(s => s.step === 'COMBINED')[0]?.paused;
+    return status === true
+  }
+
+  getCurrentUser(batch: Batch) {
+    return batch.products[0].steps.filter(s => s.step === 'COMBINED')[0]?.createdBy.username
   }
 }

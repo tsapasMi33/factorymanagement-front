@@ -83,7 +83,7 @@
       <th scope="col">Code</th>
     </tr>
     </thead>
-    <tbody>
+    <tbody *ngIf="!loading; else load">
     <tr *ngFor="let product of products">
       <td><span [ngClass]=product.currentStep>{{product.currentStep | step}}</span></td>
       <td>{{product.order.client.name}}</td>
@@ -99,6 +99,15 @@
     </tbody>
   </table>
 </form>
+  <ng-template #load>
+    <tbody>
+    <tr *ngFor="let p of products">
+      <td colspan="10"><span class="placeholder col-12"></span></td>
+    </tr>
+    </tbody>
+  </ng-template>
+
+
 <ngb-pagination
   class="d-flex justify-content-center"
   [collectionSize]="collectionSize"

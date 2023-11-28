@@ -4,6 +4,9 @@ import {Product} from "../../../core/models/product.model";
 import {Step} from "../../../core/enums/step.enum";
 import {Page} from "../../../core/models/Page.model";
 import {Client} from "../../../core/models/client.model";
+import {Batch} from "../../../core/models/batch.model";
+import {ProductFamily} from "../../../core/models/product-family.model";
+import {Packet} from "../../../core/models/packet.model";
 
 
 interface Filter {
@@ -51,11 +54,31 @@ export class ProductService {
     return this.http.patch<Product>('http://localhost:8080/product/' + productId + '/' + action, null,{params})
   }
 
-  getActiveClients() {
-    return this.http.get<Client[]>('http://localhost:8080/client/all-active');
-  }
-
   archiveAll() {
     return this.http.patch('http://localhost:8080/product/archive', null)
+  }
+
+  getActiveClients(productsAtStep?: Step) {
+    let params = new HttpParams();
+    if (productsAtStep){
+      params = params.append('productsAtStep', productsAtStep)
+    }
+    return this.http.get<Client[]>('http://localhost:8080/client/all-active', {params});
+  }
+
+  getActiveFamilies(productsAtStep?: Step) {
+    let params = new HttpParams();
+    if (productsAtStep){
+      params = params.append('productsAtStep', productsAtStep)
+    }
+    return this.http.get<ProductFamily[]>('http://localhost:8080/product-family/all-active', {params})
+  }
+
+  getActiveBatches(){
+    return this.http.get<Batch[]>('http://localhost:8080/batch/all-active')
+  }
+
+  getActivePackets() {
+    return this.http.get<Packet[]>('http://localhost:8080/packet/all-active')
   }
 }
