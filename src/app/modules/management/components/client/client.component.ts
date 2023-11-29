@@ -1,6 +1,6 @@
 import {Component, TemplateRef} from '@angular/core';
 import {Client} from "../../../../core/models/client.model";
-import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
+import {FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {ClientService} from "../../services/client.service";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {BehaviorSubject} from "rxjs";
@@ -17,6 +17,8 @@ export class ClientComponent {
   selectedClientId: number = 0;
   pageLoading = false;
   clientSaving = false;
+
+  errorMessage = new BehaviorSubject<string>('')
 
   constructor(private clientService$: ClientService,
               private modalService: NgbModal,
@@ -53,7 +55,7 @@ export class ClientComponent {
     this.selectedClientId = id
     this.clientService$.getClient(id).subscribe({
       next: value => {
-        this.fillClientForm(value)
+        this.setClientForm(value)
         this.open(modal)
       },
       error: err => console.error(err)
@@ -64,9 +66,10 @@ export class ClientComponent {
     this.clientSaving = true;
     if (this.create) {
       this.clientService$.createClient(this.clientForm.value).subscribe({
-        next: value => {
+        next: () => {
           this.load();
           this.clientSaving = false;
+          this.showSuccess('Client has been saved!')
         },
         error: err => {
           console.error(err);
@@ -75,9 +78,10 @@ export class ClientComponent {
       })
     } else {
       this.clientService$.updateClient(this.selectedClientId ,this.clientForm.value).subscribe({
-        next: value => {
+        next: () => {
           this.load();
           this.clientSaving = false;
+          this.showSuccess('Client has been updated!')
         },
         error: err => {
           console.error(err);
@@ -91,7 +95,10 @@ export class ClientComponent {
 
   deleteClient(modal: any) {
     this.clientService$.deleteClient(this.selectedClientId).subscribe({
-      next: value => this.load(),
+      next: () => {
+        this.load()
+        this.showSuccess('Client has been deleted!')
+      },
       error: err => console.error(err)
     })
     modal.close();
@@ -103,20 +110,20 @@ export class ClientComponent {
 
   generateClientForm() {
     return this.fb.group({
-      name: this.fb.control(null, {validators:[Validators.required]}),
-      companyType:[],
-      discountPercentage: this.fb.control(null, {validators: [Validators.min(0), Validators.max(60)]}),
+      name: [null, [Validators.required]],
+      companyType:[null],
+      discountPercentage: [null, [Validators.min(0), Validators.max(60)]],
       address: this.fb.group({
-        street:[],
-        number:[],
-        cp:[],
-        city:[],
-        country:[],
+        street:[null],
+        number:[null],
+        cp:[null],
+        city:[null],
+        country:[null],
       })
     });
   }
 
-  private fillClientForm(client: Client) {
+  private setClientForm(client: Client) {
     this.clientForm.get('name')?.setValue(client.name);
     this.clientForm.get('companyType')?.setValue(client.companyType);
     this.clientForm.get('discountPercentage')?.setValue(client.discountPercentage);
@@ -126,5 +133,13 @@ export class ClientComponent {
     address.get('cp')?.setValue(client.address.cp);
     address.get('city')?.setValue(client.address.city);
     address.get('country')?.setValue(client.address.country);
+  }
+
+
+  private showSuccess(message: string) {
+    this.errorMessage.next(message);
+    setInterval(() => {
+      this.errorMessage.next('')
+    },5000)
   }
 }

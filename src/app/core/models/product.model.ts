@@ -1,5 +1,6 @@
 import {Step} from "../enums/step.enum";
 import {ProductVariant} from "./product-variant.model";
+import {ProductStep} from "./product-step.model";
 
 export interface Product {
   id: number;
@@ -13,6 +14,7 @@ export interface Product {
   packetCode: string | null;
   order: Order;
   code: string;
+  steps: ProductStep[];
 }
 
 interface Order {

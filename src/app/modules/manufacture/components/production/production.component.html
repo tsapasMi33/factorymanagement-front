@@ -1,11 +1,11 @@
 <h2>Start Production</h2>
 <hr>
 <div>
-  <form [formGroup]="filterForm" (ngSubmit)="onPutBatchInProduction()">
+  <form [formGroup]="filterForm" (ngSubmit)="onFilter()">
     <table class="table table-hover">
       <thead>
       <tr class="table-dark">
-        <th scope="col" rowspan="2"><button class="btn btn-outline-success" type="submit">Create<br>Batch</button></th>
+        <th scope="col" rowspan="2"><button class="btn btn-outline-success" type="button" (click)="onPutBatchInProduction()">Put<br>In<br>Production</button></th>
         <th scope="col">
           <select class="form-select-sm" formControlName="clientId">
             <option [value]="null">All</option>
@@ -16,7 +16,7 @@
         </th>
         <th scope="col">
           <select class="form-select-sm" formControlName="productFamilyId">
-            <option [value]=null selected>All</option>
+            <option [value]=null>All</option>
             <ng-container *ngFor="let family of productFamiliesPresent">
               <option value="{{family.id}}">{{family.name}}</option>
             </ng-container>
@@ -32,7 +32,7 @@
           <input class="form-control form-control-sm" type="date" formControlName="deliveryDate">
         </th>
         <th scope="col">
-          <button class="btn btn-primary" type="button" (click)="onFilter()">Apply</button>
+          <button class="btn btn-primary" type="submit">Apply</button>
         </th>
       </tr>
       <tr class="table-dark">
@@ -44,21 +44,21 @@
         <th scope="col">Order</th>
       </tr>
       </thead>
-      <tbody *ngIf="!loading; else load">
+      <tbody *ngIf="!loading; else placeholder">
       <tr *ngFor="let product of products">
         <td><input class="form-check-input" id="flexCheckDefault" type="checkbox" (change)="onCheckBoxChange($event, product.id)"></td>
         <td>{{product.order.client.name}}</td>
         <td>{{product.variant.productFamily.name}}</td>
         <td>{{product.variant.code}}</td>
-        <td>{{product.order.createdDate | date: 'shortDate'}}</td>
-        <td>{{product.order.plannedDeliveryDate | date: 'shortDate'}}</td>
+        <td>{{product.order.createdDate | date: 'dd/MM/yy'}}</td>
+        <td>{{product.order.plannedDeliveryDate | date: 'dd/MM/yy'}}</td>
         <td>{{product.order.code}}</td>
       </tr>
       </tbody>
     </table>
   </form>
 
-  <ng-template #load>
+  <ng-template #placeholder>
     <tbody>
     <tr *ngFor="let p of products">
       <td colspan="7"><span class="placeholder col-12"></span></td>
@@ -76,3 +76,5 @@
     (pageChange)="pageChanged($event)"
   ></ngb-pagination>
 </div>
+
+

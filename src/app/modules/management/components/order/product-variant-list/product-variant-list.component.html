@@ -8,14 +8,14 @@
           <input type="text" class="form-control" placeholder="Code" formControlName="code">
           <span class="input-group-text">Family</span>
           <select class="form-select" formControlName="productFamily">
+              <option [value]="null">Choose...</option>
             <ng-container *ngFor="let productFamily of productFamilies">
-              <option></option>
               <option [value]="productFamily">{{productFamily.name}}</option>
             </ng-container>
           </select>
           <span class="input-group-text">Material</span>
           <select class="form-select" formControlName="material">
-            <option></option>
+            <option [value]="null">Choose</option>
             <option value="T304">{{Material.T304}}</option>
             <option value="T430">{{Material.T430}}</option>
             <option value="OTHER">{{Material.OTHER}}</option>

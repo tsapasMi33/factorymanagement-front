@@ -1,6 +1,11 @@
 <h2>Product Variant</h2>
 <hr>
-
+<ng-container *ngIf="(successMessage | async) !== ''">
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    {{successMessage | async}}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+</ng-container>
 <form [formGroup]="productVariantForm">
   <div class="container-fluid vh-75">
     <div class="row">

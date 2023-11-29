@@ -26,6 +26,8 @@ export class BatchService {
     return this.http.patch<Batch>('http://localhost:8080/batch/' + batchId + '/' + action, null,{params})
   }
 
-
+  getBatchByCode(code: string) {
+    return this.http.get<Batch>('http://localhost:8080/batch/code/' + code)
+  }
 
 }

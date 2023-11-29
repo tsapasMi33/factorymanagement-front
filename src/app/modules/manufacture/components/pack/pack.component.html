@@ -1,14 +1,21 @@
 <h2>Pack</h2>
 <hr>
-<div>
-  <form [formGroup]="filterForm" (ngSubmit)="onCreatePacket()">
+<div class="row">
+<div class="col-12 d-flex justify-content-end">
+  <form>
+    <button class="btn btn-primary justify" (click)="openModal(modal)">New Pack</button>
+  </form>
+</div>
+</div>
+<div class="row">
+  <form [formGroup]="filterForm" (ngSubmit)="onFilter()">
     <table class="table table-hover">
       <thead>
       <tr class="table-dark">
-        <th scope="col" rowspan="2"><button class="btn btn-outline-success" type="submit">Create<br>Packet</button></th>
+        <th scope="col" rowspan="2"><button class="btn btn-outline-success" type="button" (click)="onCreatePacket()" [disabled]="createPacketFormArray.controls.length === 0">Choose<br>&<br>Pack</button></th>
         <th scope="col">
           <select class="form-select-sm" formControlName="clientId">
-            <option selected>All</option>
+            <option [value]=null>All</option>
             <ng-container *ngFor="let client of clientsPresent">
               <option value="{{client.id}}">{{client.name}}</option>
             </ng-container>
@@ -16,7 +23,7 @@
         </th>
         <th scope="col">
           <select class="form-select-sm" formControlName="productFamilyId">
-            <option [value]=null selected>All</option>
+            <option [value]=null>All</option>
             <ng-container *ngFor="let family of productFamiliesPresent">
               <option value="{{family.id}}">{{family.name}}</option>
             </ng-container>
@@ -32,7 +39,7 @@
           <input class="form-control form-control-sm" type="date" formControlName="deliveryDate">
         </th>
         <th scope="col">
-          <button class="btn btn-primary" type="button" (click)="onFilter()">Apply</button>
+          <button class="btn btn-primary" type="submit">Apply</button>
         </th>
       </tr>
       <tr class="table-dark">
@@ -44,19 +51,28 @@
         <th scope="col">Scan Code</th>
       </tr>
       </thead>
-      <tbody>
+      <tbody *ngIf="!loading; else placeholder">
       <tr *ngFor="let product of products">
         <td><input class="form-check-input" id="flexCheckDefault" type="checkbox" (change)="onCheckBoxChange($event, product.id)"></td>
         <td>{{product.order.client.name}}</td>
         <td>{{product.variant.productFamily.name}}</td>
         <td>{{product.variant.code}}</td>
-        <td>{{product.order.createdDate | date: 'shortDate'}}</td>
-        <td>{{product.order.plannedDeliveryDate | date: 'shortDate'}}</td>
+        <td>{{product.order.createdDate | date: 'dd/MM/yy'}}</td>
+        <td>{{product.order.plannedDeliveryDate | date: 'dd/MM/yy'}}</td>
         <td>{{product.order.code}}/{{product.code}}</td>
       </tr>
       </tbody>
     </table>
   </form>
+
+  <ng-template #placeholder>
+    <tbody>
+    <tr *ngFor="let p of products">
+      <td colspan="7"><span class="placeholder col-12"></span></td>
+    </tr>
+    </tbody>
+  </ng-template>
+
   <ngb-pagination
     class="d-flex justify-content-center"
     [collectionSize]="collectionSize"
@@ -67,3 +83,28 @@
     (pageChange)="pageChanged($event)"
   ></ngb-pagination>
 </div>
+
+<ng-template #modal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title">Scan Products</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      <input type="text" class="form-control" [(ngModel)]="modalInput" (input)="checkInput()">
+    </div>
+    <hr>
+    <div>
+      <ng-container *ngFor="let product of createPacketFormArray.controls; index as i">
+        <p style="display: inline-block">
+          <span class="badge text-bg-danger">{{product.value.code}}
+            <button type="button" class="btn btn-danger" (click)="createPacketFormArray.removeAt(i)">x</button>
+          </span>
+        </p>
+      </ng-container>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-success" (click)="onCreatePacket(modal)" [disabled]="createPacketFormArray.controls.length < 1">Create</button>
+  </div>
+</ng-template>

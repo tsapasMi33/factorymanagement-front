@@ -1,14 +1,31 @@
 <h2>Weld</h2>
 <hr>
+
+<div class="row g-3 align-items-center">
+  <div class="col-auto">
+    <label for="scan" class="col-form-label">Scan</label>
+  </div>
+  <div class="col-auto">
+    <input type="text" id="scan" class="form-control" [(ngModel)]="scanInput" (input)="checkInput()">
+  </div>
+  <div class="col-auto">
+    <span id="scanMessage" class="form-text">
+      Scan Batch Barcode to Start a job or to Finish one
+    </span>
+  </div>
+</div>
+
 <div>
-  <ng-container *ngFor="let batch of batches">
-    <div class="card">
+  <ng-container *ngFor="let batch of batches; index as i">
+    <div class="card" *ngIf="!loading; else placeholder"
+         [ngClass]="{'text-bg-success': isBatchOngoing(batch), 'text-bg-warning': isBatchPaused(batch)}"
+    >
       <div class="card-header">
         Batch #: {{batch.code}}
       </div>
       <div class="card-body">
         <h5 class="card-title">Products to be welded</h5>
-        <table class="table">
+        <table class="table" [ngClass]="{'table-success': isBatchOngoing(batch), 'table-warning': isBatchPaused(batch)}">
           <thead>
           <tr>
             <th scope="col">Product</th>
@@ -31,15 +48,62 @@
           </ng-container>
           </tbody>
         </table>
+        <p *ngIf="isBatchOngoing(batch)">by: {{getCurrentUser(batch)}}</p>
       </div>
       <div class="card-footer text-center">
         <div class="btn-group" role="group">
-          <button type="button" class="btn btn-success" (click)="onStartJob(batch.id)">&#9658;</button>
-          <button type="button" class="btn btn-warning" (click)="onPauseJob(batch.id)">&#10074;&#10074;</button>
-          <button type="button" class="btn btn-danger" (click)="onFinishJob(batch.id)">&#9724;</button>
+          <button type="button" class="btn btn-success" (click)="onStartJob(batch.id, i)" [disabled]="isBatchOngoing(batch)">&#9658;</button>
+          <button type="button" class="btn btn-warning" (click)="onPauseJob(batch.id, i)" [disabled]="isBatchPaused(batch) || !isBatchOngoing(batch)">&#10074;&#10074;</button>
+          <button type="button" class="btn btn-danger" (click)="onFinishJob(batch.id, i)" [disabled]="!isBatchOngoing(batch) || isBatchPaused(batch)">&#9724;</button>
         </div>
       </div>
     </div>
+
+    <ng-template #placeholder>
+      <div class="card">
+        <div class="card-header">
+          Batch #: <span class="placeholder col-2"></span>
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">Plates to be cut</h5>
+          <table class="table">
+            <thead>
+            <tr>
+              <th scope="col">Product</th>
+              <th scope="col">Code</th>
+              <th scope="col">Material</th>
+              <th scope="col">Dimensions</th>
+              <th scope="col">Comments</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td colspan="5"><span class="placeholder col-12"></span></td>
+            </tr>
+            <tr>
+              <td colspan="5"><span class="placeholder col-12"></span></td>
+            </tr>
+            <tr>
+              <td colspan="5"><span class="placeholder col-12"></span></td>
+            </tr>
+            <tr>
+              <td colspan="5"><span class="placeholder col-12"></span></td>
+            </tr>
+            <tr>
+              <td colspan="5"><span class="placeholder col-12"></span></td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card-footer text-center">
+          <div class="btn-group" role="group">
+            <button type="button" class="btn btn-success" disabled>&#9658;</button>
+            <button type="button" class="btn btn-warning" disabled>&#10074;&#10074;</button>
+            <button type="button" class="btn btn-danger" disabled>&#9724;</button>
+          </div>
+        </div>
+      </div>
+    </ng-template>
   </ng-container>
   <ngb-pagination
     class="d-flex justify-content-center"

@@ -5,19 +5,18 @@
     <label for="client">Client</label>
     <select id="client" [(ngModel)]="selectedClient" (change)="showPackets()">
       <ng-container *ngFor="let client of presentClients">
-        <option></option>
+        <option selected disabled>Choose a client</option>
         <option>{{client}}</option>
       </ng-container>
     </select>
   </div>
   <div class="col-4 d-flex justify-content-end">
-    <form>
-      <button class="btn btn-primary justify" (click)="shipPackets()">Ship Packets</button>
-    </form>
+    <button class="btn btn-primary justify" (click)="openModal(modal)">New Shipment</button>
+    <button class="btn btn-outline-success justify" (click)="shipPackets()" [disabled]="shipmentFormArray.controls.length === 0">Choose & Ship</button>
   </div>
 </div>
 <div class="row row-cols-1 row-cols-md-3 g-4">
-  <ng-container *ngIf="selectedClient !== ''">
+  <ng-container *ngIf="selectedClient !== ''; else message">
     <ng-container *ngFor="let packet of selectedClientPackets">
       <div class="col">
         <div class="card h-100">
@@ -35,4 +34,34 @@
       </div>
     </ng-container>
   </ng-container>
+<ng-template #message>
+  <h4>Please choose a client to see available packets...</h4>
+</ng-template>
 </div>
+
+
+<ng-template #modal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title">Scan Packets</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      <input type="text" class="form-control" [(ngModel)]="modalInput" (input)="checkInput()">
+    </div>
+    <hr>
+    <div>
+      <ng-container *ngFor="let packet of shipmentFormArray.controls; index as i">
+        <p style="display: inline-block">
+          <span class="badge text-bg-danger">{{packet.value.code}}
+            <button type="button" class="btn btn-danger" (click)="shipmentFormArray.removeAt(i)">x</button>
+          </span>
+        </p>
+      </ng-container>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-success" (click)="shipPackets(modal)" [disabled]="shipmentFormArray.controls.length < 1">Create</button>
+  </div>
+</ng-template>
+

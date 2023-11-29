@@ -1,30 +1,46 @@
-import { Component } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {Material} from "../../../../core/enums/material.enum";
-import {FormArray, FormBuilder, FormControl, FormControlName, FormGroup, Validators} from "@angular/forms";
+import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
 import {ProductVariantService} from "../../services/product-variant.service";
 import {ProductFamily} from "../../../../core/models/product-family.model";
 import {ProductComponent} from "../../../../core/models/product-component.model";
+import {BehaviorSubject} from "rxjs";
 
 @Component({
   selector: 'app-product-variant',
   templateUrl: './product-variant.component.html',
   styleUrls: ['./product-variant.component.css']
 })
-export class ProductVariantComponent {
+export class ProductVariantComponent implements OnInit {
+  protected readonly Material = Material;
+  productVariantForm!: FormGroup;
 
-  productVariantForm: FormGroup;
+  successMessage = new BehaviorSubject<string>('')
 
   constructor(private productVariantService$: ProductVariantService,
-              private fb: FormBuilder) {
+              private fb: FormBuilder) { }
+
+  ngOnInit(): void {
     this.productVariantForm = this.generateForm();
   }
 
-    protected readonly Material = Material;
-  protected readonly FormControlName = FormControlName;
 
   setFamily($event: ProductFamily) {
     (this.productVariantForm.get('productFamily') as FormControl).setValue($event)
+  }
 
+  generateForm() {
+    return this.fb.group({
+      material: [null, [Validators.required]],
+      variantIdentifier: [null, [Validators.required, Validators.minLength(1)]],
+      width: [null],
+      length: [null],
+      height: [null],
+      price: [null, [Validators.min(0), Validators.required]],
+      description: [null],
+      productFamily: [null, [Validators.required]],
+      components: this.fb.array([])
+    })
   }
 
   get componentsArray() {
@@ -37,21 +53,17 @@ export class ProductVariantComponent {
 
   create() {
     this.productVariantService$.createProductVariant(this.productVariantForm.value).subscribe({
-      next: value => this.productVariantForm.reset()
+      next: () => {
+        this.productVariantForm = this.generateForm();
+        this.showSuccess('The new product Variant has been successfully encoded')
+      }
     })
   }
 
-  generateForm() {
-    return this.fb.group({
-      material: this.fb.control(null, {validators: Validators.required,}),
-      variantIdentifier: this.fb.control(null, {validators: [Validators.required, Validators.minLength(1)]}),
-      width:[],
-      length:[],
-      height:[],
-      price: this.fb.control(null, {validators: [Validators.min(0)]}),
-      description:[],
-      productFamily: this.fb.control(null, {validators: [Validators.required]}),
-      components: this.fb.array([])
-    })
+  private showSuccess(message: string) {
+    this.successMessage.next(message);
+    setInterval(() => {
+      this.successMessage.next('')
+    },5000)
   }
 }

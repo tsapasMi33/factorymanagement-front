@@ -17,6 +17,8 @@ export class BendComponent {
   public maxSize=15;
   public rotate= true;
 
+  scanInput = '';
+
   public loading = false;
 
   constructor(private batchService$: BatchService) {
@@ -45,21 +47,21 @@ export class BendComponent {
     })
   }
 
-  onStartJob(id: number) {
+  onStartJob(id: number, index: number) {
     this.batchService$.doJob("BENT", id, 'start').subscribe({
-      next: () => this.loadContent(1)
+      next: value => this.batches[index] = value
     });
   }
 
-  onPauseJob(id: number) {
+  onPauseJob(id: number, index: number) {
     this.batchService$.doJob("BENT", id, 'pause').subscribe({
-      next: () => this.loadContent(1)
+      next: value => this.batches[index] = value
     });
   }
 
-  onFinishJob(batchId: number) {
+  onFinishJob(batchId: number, index: number) {
     this.batchService$.doJob("BENT", batchId, 'finish').subscribe({
-      next: response => this.loadContent(this.page),
+      next: value => this.batches.splice(index, 1),
       error: err => {console.log(err)}
     });
 
@@ -81,5 +83,27 @@ export class BendComponent {
 
   getCurrentUser(batch: Batch) {
     return batch.products[0].steps.filter(s => s.step === 'BENT')[0]?.createdBy.username
+  }
+
+  checkInput() {
+    const regex  = /[0-9]{8}/;
+    if (regex.test(this.scanInput)) {
+      this.doJob()
+      this.scanInput = '';
+    }
+  }
+
+  doJob() {
+    this.batchService$.getBatchByCode(this.scanInput).subscribe({
+      next: value => {
+        if (!this.isBatchOngoing(value)) {
+          this.batches.filter(b => b.id !== value.id);
+          this.batches.splice(0,0, value)
+          this.onStartJob(value.id, 0);
+        } else {
+          this.onFinishJob(value.id, 0);
+        }
+      }
+    })
   }
 }

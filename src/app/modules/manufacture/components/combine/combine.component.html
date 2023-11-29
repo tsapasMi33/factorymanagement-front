@@ -1,7 +1,22 @@
 <h2>Combine</h2>
 <hr>
+
+<div class="row g-3 align-items-center">
+  <div class="col-auto">
+    <label for="scan" class="col-form-label">Scan</label>
+  </div>
+  <div class="col-auto">
+    <input type="text" id="scan" class="form-control" [(ngModel)]="scanInput" (input)="checkInput()">
+  </div>
+  <div class="col-auto">
+    <span id="scanMessage" class="form-text">
+      Scan Batch Barcode to Start a job or to Finish one
+    </span>
+  </div>
+</div>
+
 <div>
-  <ng-container *ngFor="let batch of batches">
+  <ng-container *ngFor="let batch of batches; index as i">
     <div class="card" *ngIf="!loading; else placeholder"
          [ngClass]="{'text-bg-success': isBatchOngoing(batch), 'text-bg-warning': isBatchPaused(batch)}"
     >
@@ -10,7 +25,7 @@
       </div>
       <div class="card-body">
         <h5 class="card-title">Components</h5>
-        <table class="table">
+        <table class="table" [ngClass]="{'table-success': isBatchOngoing(batch), 'table-warning': isBatchPaused(batch)}">
           <thead>
           <tr>
             <th scope="col">Part</th>
@@ -43,13 +58,12 @@
       </div>
         <div class="card-footer text-center">
           <div class="btn-group" role="group">
-            <button type="button" class="btn btn-success" (click)="onStartJob(batch.id)" [disabled]="isBatchOngoing(batch)">&#9658;</button>
-            <button type="button" class="btn btn-warning" (click)="onPauseJob(batch.id)" [disabled]="isBatchPaused(batch) || !isBatchOngoing(batch)">&#10074;&#10074;</button>
-            <button type="button" class="btn btn-danger" (click)="onFinishJob(batch.id)" [disabled]="!isBatchOngoing(batch) || isBatchPaused(batch)">&#9724;</button>
+            <button type="button" class="btn btn-success" (click)="onStartJob(batch.id, i)" [disabled]="isBatchOngoing(batch)">&#9658;</button>
+            <button type="button" class="btn btn-warning" (click)="onPauseJob(batch.id, i)" [disabled]="isBatchPaused(batch) || !isBatchOngoing(batch)">&#10074;&#10074;</button>
+            <button type="button" class="btn btn-danger" (click)="onFinishJob(batch.id, i)" [disabled]="!isBatchOngoing(batch) || isBatchPaused(batch)">&#9724;</button>
           </div>
         </div>
     </div>
-
 
     <ng-template #placeholder>
       <div class="card">

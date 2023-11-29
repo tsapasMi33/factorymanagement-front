@@ -1,5 +1,11 @@
 <h2>Users</h2>
 <hr>
+<ng-container *ngIf="(errorMessage | async) !== ''">
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    {{errorMessage | async}}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+</ng-container>
 <div class="text-end">
   <button class="btn btn-primary" type="button" (click)="createUser(modal)">Create User</button>
 </div>
@@ -41,9 +47,9 @@
           <input type="password" class="form-control" id="floatingPassword" placeholder="Password" formControlName="password">
           <label for="floatingPassword">Password</label>
         </div>
-        <label for="role">Role</label>
+        <br>
         <select class="form-select" id="role"  formControlName="role">
-          <option selected disabled>Choose one</option>
+          <option [value]="null" selected>Role</option>
           <option>ADMIN</option>
           <option>CUTTER</option>
           <option>BENDER</option>
@@ -52,15 +58,16 @@
           <option>FINISHER</option>
           <option>PACKER</option>
         </select>
-        <label for="costPerMinute">Cost Per Minute</label>
-        <div class="input-group mb-3">
-          <span class="input-group-text">€</span>
+        <br>
+        <div class="form-floating input-group mb-3">
           <input type="number" class="form-control" id="costPerMinute"  formControlName="costPerMinute">
+          <span class="input-group-text">€</span>
+          <label for="costPerMinute">Cost Per Minute</label>
         </div>
       </div>
     </form>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-outline-success" (click)="saveClient(modal)">{{create ? 'Create' : 'Update'}}</button>
+    <button type="button" class="btn btn-outline-success" (click)="saveUser(modal)" [disabled]="userForm.invalid">{{create ? 'Create' : 'Update'}}</button>
   </div>
 </ng-template>

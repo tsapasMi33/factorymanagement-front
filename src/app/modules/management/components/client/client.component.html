@@ -1,5 +1,11 @@
 <h2>Clients</h2>
 <hr>
+<ng-container *ngIf="(errorMessage | async) !== ''">
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    {{errorMessage | async}}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+</ng-container>
 <div class="text-end">
   <button class="btn btn-primary" type="button" (click)="createClient(modal)">Create Client</button>
 </div>
@@ -53,33 +59,57 @@
           <form [formGroup]="clientForm">
             <div class="mb-3 row">
               <div class="col-6">
-                <input type="text" class="form-control" formControlName="name" placeholder="Name">
+                <div class="form-floating mb-3">
+                  <input type="text" class="form-control" id="floatingName" placeholder="Name" formControlName="name">
+                  <label for="floatingName">Name</label>
+                </div>
               </div>
               <div class="col-3">
-                <input type="text" class="form-control" formControlName="companyType" placeholder="Type">
+                <div class="form-floating mb-3">
+                  <input type="text" class="form-control" id="floatingCompanyType" placeholder="Type" formControlName="companyType">
+                  <label for="floatingCompanyType">Type</label>
+                </div>
               </div>
               <div class="col-3">
-                <input type="number" class="form-control" formControlName="discountPercentage" placeholder="Discount">
+                <div class="form-floating mb-3">
+                  <input type="number" class="form-control" id="floatingDiscount" placeholder="Discount" formControlName="discountPercentage">
+                  <label for="floatingDiscount">Discount</label>
+                </div>
               </div>
               <br><br>
               <div formGroupName="address">
                 <div class="mb-3 row">
                   <div class="col-6">
-                    <input type="text" class="form-control" formControlName="street" placeholder="Street">
+                    <div class="form-floating mb-3">
+                      <input type="text" class="form-control" id="floatingStreet" placeholder="Street" formControlName="street">
+                      <label for="floatingStreet">Street</label>
+                    </div>
                   </div>
                   <div class="col-3">
-                    <input type="text" class="form-control" formControlName="number" placeholder="No">
+                    <div class="form-floating mb-3">
+                      <input type="text" class="form-control" id="floatingNumber" placeholder="No" formControlName="number">
+                      <label for="floatingNumber">Number</label>
+                    </div>
                   </div>
                   <div class="col-3">
-                    <input type="text" class="form-control" formControlName="cp" placeholder="CP">
+                    <div class="form-floating mb-3">
+                      <input type="text" class="form-control" id="floatingCp" placeholder="CP" formControlName="cp">
+                      <label for="floatingCp">CP</label>
+                    </div>
                   </div>
                 </div>
                 <div class="mb-3 row">
                   <div class="col-6">
-                    <input type="text" class="form-control" formControlName="city" placeholder="City">
+                    <div class="form-floating mb-3">
+                      <input type="text" class="form-control" id="floatingCity" placeholder="City" formControlName="city">
+                      <label for="floatingCity">City</label>
+                    </div>
                   </div>
                   <div class="col-6">
-                    <input type="text" class="form-control" formControlName="country" placeholder="Country">
+                    <div class="form-floating mb-3">
+                      <input type="text" class="form-control" id="floatingCountry" placeholder="Country" formControlName="country">
+                      <label for="floatingCountry">Country</label>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -89,7 +119,7 @@
       </form>
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-outline-success" (click)="saveClient(modal)"  *ngIf="!clientSaving; else saving">{{create ? 'Create' : 'Update'}}</button>
+        <button type="button" class="btn btn-outline-success" (click)="saveClient(modal)"  *ngIf="!clientSaving; else saving" [disabled]="clientForm.invalid">{{create ? 'Create' : 'Update'}}</button>
         <button type="button" class="btn btn-outline-danger" (click)="deleteClient(modal)"  *ngIf="!create">Delete</button>
       <ng-template #saving>
         <button class="btn btn-warning" type="button" disabled>

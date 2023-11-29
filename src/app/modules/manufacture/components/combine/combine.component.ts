@@ -17,6 +17,8 @@ export class CombineComponent {
   public maxSize=15;
   public rotate= true;
 
+  scanInput = '';
+
   public loading = false;
 
   constructor(private batchService$: BatchService) {
@@ -31,7 +33,6 @@ export class CombineComponent {
     this.batchService$.getBatchesFor(page, "COMBINED").subscribe({
       next: value => {
         this.batches = value.content
-        this.batches.forEach(b => b.products.forEach(p => p.variant.components = p.variant.components.filter(c => c.type === 'PLATE')));
         this.collectionSize = value.totalElements;
         this.page = value.number + 1;
         this.pageSize = value.size;
@@ -45,21 +46,21 @@ export class CombineComponent {
     })
   }
 
-  onStartJob(id: number) {
+  onStartJob(id: number, index: number) {
     this.batchService$.doJob("COMBINED", id, 'start').subscribe({
-      next: () => this.loadContent(1)
+      next: value => this.batches[index] = value
     });
   }
 
-  onPauseJob(id: number) {
+  onPauseJob(id: number, index: number) {
     this.batchService$.doJob("COMBINED", id, 'pause').subscribe({
-      next: () => this.loadContent(1)
+      next: value => this.batches[index] = value
     });
   }
 
-  onFinishJob(id: number) {
+  onFinishJob(id: number, index: number) {
     this.batchService$.doJob("COMBINED", id, 'finish').subscribe({
-      next: response => this.loadContent(this.page),
+      next: value => this.batches.splice(index, 1),
       error: err => {console.log(err)}
     });
 
@@ -81,5 +82,27 @@ export class CombineComponent {
 
   getCurrentUser(batch: Batch) {
     return batch.products[0].steps.filter(s => s.step === 'COMBINED')[0]?.createdBy.username
+  }
+
+  checkInput() {
+    const regex  = /[0-9]{8}/;
+    if (regex.test(this.scanInput)) {
+      this.doJob()
+      this.scanInput = '';
+    }
+  }
+
+  doJob() {
+    this.batchService$.getBatchByCode(this.scanInput).subscribe({
+      next: value => {
+        if (!this.isBatchOngoing(value)) {
+          this.batches.filter(b => b.id !== value.id);
+          this.batches.splice(0,0, value)
+          this.onStartJob(value.id, 0);
+        } else {
+          this.onFinishJob(value.id, 0);
+        }
+      }
+    })
   }
 }

@@ -58,18 +58,24 @@ export class ProductService {
     return this.http.patch('http://localhost:8080/product/archive', null)
   }
 
-  getActiveClients(productsAtStep?: Step) {
+  getActiveClients(productsAtStep?: Step, productsAtNextStep?: Step) {
     let params = new HttpParams();
     if (productsAtStep){
       params = params.append('productsAtStep', productsAtStep)
     }
+    if (productsAtNextStep){
+      params = params.append('productsAtNextStep', productsAtNextStep)
+    }
     return this.http.get<Client[]>('http://localhost:8080/client/all-active', {params});
   }
 
-  getActiveFamilies(productsAtStep?: Step) {
+  getActiveFamilies(productsAtStep?: Step, productsAtNextStep?: Step) {
     let params = new HttpParams();
     if (productsAtStep){
       params = params.append('productsAtStep', productsAtStep)
+    }
+    if (productsAtNextStep){
+      params = params.append('productsAtNextStep', productsAtNextStep)
     }
     return this.http.get<ProductFamily[]>('http://localhost:8080/product-family/all-active', {params})
   }
@@ -81,4 +87,8 @@ export class ProductService {
   getActivePackets() {
     return this.http.get<Packet[]>('http://localhost:8080/packet/all-active')
   }
+
+  getProductByCode(orderCode: string, productCode: string) {
+    return this.http.get<Product>('http://localhost:8080/product/code/' + orderCode + '/' + productCode);
+}
 }

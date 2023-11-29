@@ -11,17 +11,35 @@ import {FormBuilder, FormGroup} from "@angular/forms";
   styleUrls: ['./product-variant-list.component.css']
 })
 export class ProductVariantListComponent implements OnInit {
+  protected readonly Material = Material;
   productVariants!: ProductVariant[];
   filteredProductVariants!: ProductVariant[];
   productFamilies!: ProductFamily[];
-  filterForm: FormGroup;
+  filterForm!: FormGroup;
   selectedProductVariant!: ProductVariant
   @Output() variantSelectedEmitter = new EventEmitter<ProductVariant>;
 
-  protected readonly Material = Material;
+  constructor(private productVariantService$: ProductVariantService,
+              private fb: FormBuilder) { }
 
-  constructor(private productVariantService$: ProductVariantService, private fb: FormBuilder) {
-    this.filterForm = this.fb.group({
+  ngOnInit(): void {
+    this.filterForm = this.generateFilterForm();
+    this.load();
+  }
+
+  load() {
+    this.productVariantService$.getProductVariants().subscribe({
+      next: value => {
+        this.productVariants = value
+        this.filteredProductVariants = value
+        this.productFamilies = [...new Map(value.map(value => [value.productFamily.id, value.productFamily])).values()]
+      },
+      error: err => console.error(err)
+    })
+  }
+
+  generateFilterForm() {
+    return this.fb.group({
       code: [null],
       productFamily: [null],
       material: [null],
@@ -31,41 +49,17 @@ export class ProductVariantListComponent implements OnInit {
     })
   }
 
-  load() {
-    this.productVariantService$.getProductVariants().subscribe({
-      next: value => {
-        this.productVariants = value
-        this.filteredProductVariants = value
-        this.productFamilies = value.map(value => value.productFamily)
-      },
-      error: err => console.error(err)
-    })
-  }
-
-  ngOnInit(): void {
-    this.load();
-  }
-
   applyFilter() {
-    const fValue = this.filterForm.value;
-    if (fValue.code != null) {
-      this.filteredProductVariants = this.productVariants.filter(value => value.code.toLowerCase().includes(fValue.code.toLowerCase()))
-    }
-    if (fValue.family != null) {
-      this.filteredProductVariants = this.productVariants.filter(value => value.productFamily === fValue.productFamily)
-    }
-    if (fValue.material != null) {
-      this.filteredProductVariants = this.productVariants.filter(value => value.material === fValue.material)
-    }
-    if (fValue.length != null) {
-      this.filteredProductVariants = this.productVariants.filter(value => value.length === fValue.length)
-    }
-    if (fValue.width != null) {
-      this.filteredProductVariants = this.productVariants.filter(value => value.width === fValue.width)
-    }
-    if (fValue.height != null) {
-      this.filteredProductVariants = this.productVariants.filter(value => value.height === fValue.height)
-    }
+    this.filteredProductVariants = this.productVariants.filter(c => {
+      return (
+        (!this.filterForm.get("code")?.value || c.code.toLowerCase().includes(this.filterForm.get("code")?.value.toLowerCase())) &&
+        (!this.filterForm.get("productFamily")?.value || c.productFamily === this.filterForm.get("productFamily")?.value) &&
+        (!this.filterForm.get("material")?.value || c.material === this.filterForm.get("material")?.value) &&
+        (!this.filterForm.get("length")?.value || c.length === this.filterForm.get("length")?.value) &&
+        (!this.filterForm.get("width")?.value || c.width === this.filterForm.get("width")?.value) &&
+        (!this.filterForm.get("height")?.value || c.height === this.filterForm.get("height")?.value)
+      );
+    });
   }
 
   resetFilter() {

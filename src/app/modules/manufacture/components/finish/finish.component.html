@@ -1,28 +1,69 @@
 <h2>Finish</h2>
 <hr>
+
+<div class="row g-3 align-items-center">
+  <div class="col-auto">
+    <label for="scan" class="col-form-label">Scan</label>
+  </div>
+  <div class="col-auto">
+    <input type="text" id="scan" class="form-control" [(ngModel)]="scanInput" (input)="checkInput()">
+  </div>
+  <div class="col-auto">
+    <span id="scanMessage" class="form-text">
+      Scan Product Barcode to Start a job or to Finish one
+    </span>
+  </div>
+</div>
+
 <ng-container>
 <div class="row row-cols-1 row-cols-md-5 g-5">
-  <div class="col" *ngFor="let product of products">
-    <div class="card h-100">
+  <div class="col" *ngFor="let product of products; index as i">
+    <div class="card h-100" *ngIf="!loading; else placeholder"
+         [ngClass]="{'text-bg-success': isProductOngoing(product), 'text-bg-warning': isProductPaused(product)}"
+    >
       <div class="card-header">
-        {{product.order.client.name}}
+        {{product.order.client.name}}<br>
+        {{product.order.code}}/{{product.code}}
       </div>
       <div class="card-body">
+        <h5></h5>
         <h5 class="card-title">{{product.variant.productFamily.name}}</h5>
         <h6 class="card-subtitle">{{product.variant.code }}</h6>
         <p class="card-text">{{product.variant.description}}</p>
         <p class="card-text text-body-emphasis">{{product.comments}}</p>
       </div>
+      <p *ngIf="isProductOngoing(product)">by: {{getCurrentUser(product)}}</p>
       <div class="card-footer text-center">
         <div class="btn-group" role="group">
-          <button type="button" class="btn btn-success" (click)="onStartJob(product.id)">&#9658;</button>
-          <button type="button" class="btn btn-warning" (click)="onPauseJob(product.id)">&#10074;&#10074;</button>
-          <button type="button" class="btn btn-danger" (click)="onFinishJob(product.id)">&#9724;</button>
+          <button type="button" class="btn btn-success" (click)="onStartJob(product.id, i)" [disabled]="isProductOngoing(product)">&#9658;</button>
+          <button type="button" class="btn btn-warning" (click)="onPauseJob(product.id, i)" [disabled]="isProductPaused(product) || !isProductOngoing(product)">&#10074;&#10074;</button>
+          <button type="button" class="btn btn-danger" (click)="onFinishJob(product.id, i)" [disabled]="!isProductOngoing(product) || isProductPaused(product)">&#9724;</button>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+  <ng-template #placeholder>
+    <div class="card h-100">
+      <div class="card-header">
+        <span class="placeholder col-4"></span>
+      </div>
+      <div class="card-body">
+        <h5 class="card-title"><span class="placeholder col-5"></span></h5>
+        <h6 class="card-subtitle"><span class="placeholder col-5"></span></h6>
+        <p class="card-text"><span class="placeholder col-5"></span></p>
+        <p class="card-text text-body-emphasis"><span class="placeholder col-5"></span></p>
+      </div>
+      <div class="card-footer text-center">
+        <div class="btn-group" role="group">
+          <button type="button" class="btn btn-success" disabled>&#9658;</button>
+          <button type="button" class="btn btn-warning" disabled>&#10074;&#10074;</button>
+          <button type="button" class="btn btn-danger" disabled>&#9724;</button>
+        </div>
+      </div>
+    </div>
+  </ng-template>
 </ng-container>
 <ngb-pagination
   class="d-flex justify-content-center"
