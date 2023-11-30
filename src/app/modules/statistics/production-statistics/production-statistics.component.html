@@ -1,0 +1,42 @@
+<h2>Production Statistics</h2>
+<hr>
+  <div class="row">
+
+    <div class="col-2">
+      <h4>Show statistics...</h4>
+      <div class="input-group mb-3">
+        <button class="btn btn-outline-secondary" type="button">For:</button>
+        <select class="form-select" id="inputGroupSelect03" aria-label="Example select with button addon">
+          <option value="1">Day</option>
+          <option value="2">Week</option>
+          <option value="3">Month</option>
+          <option value="3">Trimestrial</option>
+          <option value="3">Semestrial</option>
+        </select>
+      </div>
+      <nav aria-label="Page navigation example">
+        <ul class="pagination">
+          <li class="page-item"><a class="page-link">Previous</a></li>
+          <li class="page-item disabled"><a class="page-link">11/11/23</a></li>
+          <li class="page-item"><a class="page-link">Next</a></li>
+        </ul>
+      </nav>
+
+    </div>
+
+    <ng-container *ngIf="!reload">
+    <div class="col-10">
+      <canvas
+        baseChart
+        class="chart"
+        [data]="barChartData"
+        [options]="barChartOptions"
+        [plugins]="barChartPlugins"
+        [type]="barChartType"
+        (chartHover)="chartHovered($event)"
+        (chartClick)="chartClicked($event)"
+      ></canvas>
+      </div>
+    </ng-container>
+  </div>
+
