@@ -1,0 +1,11 @@
+<div class="col-10">
+  <canvas
+    baseChart
+    class="chart"
+    [data]="barChartData"
+    [options]="barChartOptions"
+    [plugins]="barChartPlugins"
+    [type]="barChartType"
+    (chartClick)="chartClicked($event)"
+  ></canvas>
+</div>

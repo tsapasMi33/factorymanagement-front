@@ -21,22 +21,15 @@
           <li class="page-item"><a class="page-link">Next</a></li>
         </ul>
       </nav>
-
     </div>
 
-    <ng-container *ngIf="!reload">
     <div class="col-10">
-      <canvas
-        baseChart
-        class="chart"
-        [data]="barChartData"
-        [options]="barChartOptions"
-        [plugins]="barChartPlugins"
-        [type]="barChartType"
-        (chartHover)="chartHovered($event)"
-        (chartClick)="chartClicked($event)"
-      ></canvas>
+      <div class="chart-container">
+        <ng-container *ngIf="stats">
+          <h3>Period: {{stats.startDate | date:'dd/MM/yy'}} to {{stats.endDate | date:'dd/MM/yy'}}</h3>
+        </ng-container>
+        <app-bar-chart #chart (barClicked)="getDataFor($event)"></app-bar-chart>
       </div>
-    </ng-container>
+    </div>
   </div>
 

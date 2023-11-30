@@ -1,5 +1,6 @@
 export interface Stats{
-  stats: any;//Map<string,number>; // TODO precise
+  stats: any;
+  labels: string[];
   startDate: Date;
   endDate: Date
 }
