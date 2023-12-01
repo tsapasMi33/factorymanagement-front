@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {Component, EventEmitter, Output, ViewChild} from '@angular/core';
 import {BaseChartDirective} from "ng2-charts";
 import {ChartConfiguration, ChartData, ChartEvent, ChartType} from "chart.js";
 import DataLabelsPlugin from "chartjs-plugin-datalabels";
@@ -19,6 +19,8 @@ export class BarChartComponent {
   constructor() {
   }
 
+
+
   public barChartOptions: ChartConfiguration['options'] = {
     responsive: true,
     scales: {
@@ -37,7 +39,7 @@ export class BarChartComponent {
       },
     },
   };
-  public barChartType: ChartType = 'bar';
+  public chartType: ChartType = 'bar';
   public barChartPlugins = [DataLabelsPlugin];
 
   public barChartData: ChartData<'bar'> = {
@@ -52,20 +54,72 @@ export class BarChartComponent {
           ]
       },
     ],
+
   }
+
+  // Pie
+  public pieChartOptions: ChartConfiguration['options'] = {
+    aspectRatio: 2.8,
+    responsive: true,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      datalabels: {
+        formatter: (value: any, ctx: any) => {
+          if (ctx.chart.data.labels) {
+            return ctx.chart.data.labels[ctx.dataIndex];
+          }
+        },
+      },
+    },
+  };
+  public pieChartData: ChartData<'pie', number[], string | string[]> = {
+    labels: [['Download', 'Sales'], ['In', 'Store', 'Sales'], 'Mail Sales'],
+    datasets: [
+      {
+        data: [300, 500, 100],
+      },
+    ],
+  };
+
+  chosenOptions = this.barChartOptions;
+  chosenData:any = this.barChartData;
+
 
 
 
   // events
-  public chartClicked(e : any): void {
-    if (e.active.length > 0) {
-      this.barClicked.emit(this.barChartData.labels!.at(e.active[0].index))
+  public chartClicked({event, active,}: { event?: ChartEvent; active?: object[]; }): void {
+    if (active && active.length > 0) {
+      // @ts-ignore
+      const chartElement = active[0].element;
+      const label = chartElement.$context.parsed.x;
+
+      // @ts-ignore
+      this.barClicked.emit(this.barChartData.labels[label]);
     }
   }
 
-  public update(stats: number[], labels: string[], level?: string): void {
-    this.barChartData.labels = labels
-    this.barChartData.datasets[0].data = stats;
+  public update(stats: number[], labels: string[], level: string): void {
+    console.log(stats)
+    this.level = level
+    if (level === 'user') {
+      this.chartType = 'pie'
+      this.pieChartData.labels = labels
+      this.pieChartData.datasets[0].data = [];
+      for (let k in stats) {
+        this.pieChartData.datasets[0].data.push(stats[k])
+      }
+      this.chosenOptions = this.pieChartOptions
+      this.chosenData = this.pieChartData
+    } else {
+      this.barChartData.labels = labels
+      this.barChartData.datasets[0].data = stats;
+      this.chartType = "bar"
+      this.chosenOptions = this.barChartOptions
+      this.chosenData = this.barChartData
+    }
     this.chart?.update();
   }
 

@@ -1,35 +1,38 @@
 <h2>Production Statistics</h2>
 <hr>
-  <div class="row">
+<div class="row">
+  <div class="col-2 text-center">
+    <ngb-datepicker #dp (dateSelect)="onDateSelection($event)" [displayMonths]="1" [dayTemplate]="t" [minDate]="minDate"
+                    [maxDate]="maxDate" outsideDays="hidden" [showWeekNumbers]="true"/>
 
-    <div class="col-2">
-      <h4>Show statistics...</h4>
-      <div class="input-group mb-3">
-        <button class="btn btn-outline-secondary" type="button">For:</button>
-        <select class="form-select" id="inputGroupSelect03" aria-label="Example select with button addon">
-          <option value="1">Day</option>
-          <option value="2">Week</option>
-          <option value="3">Month</option>
-          <option value="3">Trimestrial</option>
-          <option value="3">Semestrial</option>
-        </select>
-      </div>
-      <nav aria-label="Page navigation example">
-        <ul class="pagination">
-          <li class="page-item"><a class="page-link">Previous</a></li>
-          <li class="page-item disabled"><a class="page-link">11/11/23</a></li>
-          <li class="page-item"><a class="page-link">Next</a></li>
-        </ul>
-      </nav>
+    <ng-template #t let-date let-focused="focused">
+	<span
+    class="custom-day"
+    [class.focused]="focused"
+    [class.range]="isRange(date)"
+    [class.faded]="isHovered(date) || isInside(date)"
+    (mouseenter)="hoveredDate = date"
+    (mouseleave)="hoveredDate = null"
+  >
+		{{ date.day }}
+	</span>
+    </ng-template>
+
+    <div class="d-grid gap-2">
+      <button class="btn btn-primary" type="button" (click)="choosePeriod()">Show Stats</button>
     </div>
 
-    <div class="col-10">
-      <div class="chart-container">
-        <ng-container *ngIf="stats">
-          <h3>Period: {{stats.startDate | date:'dd/MM/yy'}} to {{stats.endDate | date:'dd/MM/yy'}}</h3>
-        </ng-container>
+  </div>
+
+  <div class="col-10">
+    <div class="chart-container">
+      <ng-container *ngIf="ready">
+        <button type="button" class="btn btn-light" *ngIf="!topLevel" (click)="goBack()">Go back</button>
+        <h3>
+          Period: {{startDate | date:'dd/MM/yy'}} {{endDate !== startDate ? 'to ' + (endDate | date:'dd/MM/yy') : ''}}</h3>
+      </ng-container>
         <app-bar-chart #chart (barClicked)="getDataFor($event)"></app-bar-chart>
-      </div>
     </div>
   </div>
+</div>
 

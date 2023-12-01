@@ -10,13 +10,18 @@ export class StatisticsService {
 
   constructor(private http: HttpClient) { }
 
-  getProductionStatistics(form: any){
+  getProductionStatistics(startDate: string, endDate: string){
     return this.http.post<Stats>('http://localhost:8080/stats/production',
-      {startDate: new Date(2023,10,31), endDate:  new Date(2023,10,31) })
+      {startDate: startDate, endDate: endDate})
   }
 
-  getStatisticsForStep(step: Step, form: any) {
+  getStatisticsForStep(step: string, startDate: Date, endDate: Date) {
     return this.http.post<Stats>('http://localhost:8080/stats/production/step',
-      {step: step ,startDate: new Date(2023,10,31), endDate:  new Date(2023,10,31) })
+      {step: step ,startDate: new Date(2023,10,32), endDate:  new Date(2023,10,32) })
+  }
+
+  getStatisticsForUser(username: string, step: string, startDate: Date, endDate: Date) {
+    return this.http.post<Stats>('http://localhost:8080/stats/production/step/user',
+      {username: username, step: step ,startDate: new Date(2023,10,32), endDate:  new Date(2023,10,32) })
   }
 }
