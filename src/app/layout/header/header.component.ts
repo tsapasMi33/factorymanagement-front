@@ -14,4 +14,8 @@ export class HeaderComponent {
   onLogout() {
     this.$authService.disconnect();
   }
+
+  get connectedUserRole() {
+    return this.$authService.connectedUser?.role;
+  }
 }

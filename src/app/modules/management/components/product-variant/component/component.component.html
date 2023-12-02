@@ -29,24 +29,15 @@
     <div class="col-8">
       <div class="input-group mb-3">
         <span class="input-group-text">Type</span>
-        <select class="form-select w-25" formControlName="type">
-          <option value="PLATE">{{MaterialType.PLATE}}</option>
-          <option value="TUBE">{{MaterialType.TUBE}}</option>
-          <option value="FINISHED_PRODUCT">{{MaterialType.FINISHED_PRODUCT}}</option>
-          <option value="L">{{MaterialType.L}}</option>
-          <option value="OMEGA">{{MaterialType.OMEGA}}</option>
-          <option value="Z">{{MaterialType.Z}}</option>
+        <select class="form-select" formControlName="type">
+          <ng-container *ngFor="let type of types">
+            <option [value]="type.id">{{type.name}}[{{type.material}}]</option>
+          </ng-container>
         </select>
-        <span class="input-group-text">Material</span>
-        <select class="form-select" formControlName="material">
-          <option value="T304">{{Material.T304}}</option>
-          <option value="T430">{{Material.T430}}</option>
-          <option value="OTHER">{{Material.OTHER}}</option>
-        </select>
-      </div>
-      <div class="input-group mb-3">
         <span class="input-group-text">Thickness [<sup>mm</sup>&frasl;<sub>10</sub>]</span>
         <input type="number" class="form-control" formControlName="thickness">
+      </div>
+      <div class="input-group mb-3">
         <span class="input-group-text">Length [mm]</span>
         <input type="number" class="form-control" formControlName="length">
         <span class="input-group-text">Width [mm]</span>
@@ -62,7 +53,7 @@
 
 <ng-template #modal let-modal>
   <div class="modal-header">
-    <h4 class="modal-title" id="modal-basic-title">Create Family</h4>
+    <h4 class="modal-title" id="modal-basic-title">Create Component</h4>
     <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
   </div>
   <form [formGroup]="createForm" (ngSubmit)="create(modal)">
@@ -75,20 +66,15 @@
       </div>
       <div class="input-group mb-3">
         <span class="input-group-text">Type</span>
-        <select class="form-select w-25" formControlName="type">
-          <option value="PLATE">{{MaterialType.PLATE}}</option>
-          <option value="TUBE">{{MaterialType.TUBE}}</option>
-          <option value="FINISHED_PRODUCT">{{MaterialType.FINISHED_PRODUCT}}</option>
-          <option value="L">{{MaterialType.L}}</option>
-          <option value="OMEGA">{{MaterialType.OMEGA}}</option>
-          <option value="Z">{{MaterialType.Z}}</option>
+        <ng-container formGroupName="type">
+        <select class="form-select w-25" formControlName="id">
+          <ng-container *ngFor="let type of types">
+            <option [value]="type.id">{{type.name}}[{{type.material}}]</option>
+          </ng-container>
         </select>
-        <span class="input-group-text">Material</span>
-        <select class="form-select" formControlName="material">
-          <option value="T304">{{Material.T304}}</option>
-          <option value="T430">{{Material.T430}}</option>
-          <option value="OTHER">{{Material.OTHER}}</option>
-        </select>
+        </ng-container>
+        <span class="input-group-text">Thickness [<sup>mm</sup>&frasl;<sub>10</sub>]</span>
+        <input type="number" class="form-control" formControlName="thickness">
       </div>
       <div class="input-group mb-3">
         <span class="input-group-text">Length [mm]</span>
@@ -97,8 +83,7 @@
         <input type="number" class="form-control" formControlName="width">
       </div>
       <div class="input-group mb-3">
-        <span class="input-group-text">Thickness [<sup>mm</sup>&frasl;<sub>10</sub>]</span>
-        <input type="number" class="form-control" formControlName="thickness">
+
       </div>
     </div>
     <div class="modal-footer">

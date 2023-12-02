@@ -6,6 +6,7 @@ import {FormBuilder, FormGroup} from "@angular/forms";
 import {Client} from "../../../../core/models/client.model";
 import {Batch} from "../../../../core/models/batch.model";
 import {Packet} from "../../../../core/models/packet.model";
+import {AuthService} from "../../../../services/auth.service";
 
 @Component({
     selector: 'app-planning',
@@ -30,6 +31,7 @@ export class PlanningComponent implements OnInit {
   loading = false
 
   constructor(private productService$: ProductService,
+              private authService$: AuthService,
               private fb: FormBuilder) {
     this.filterForm = this.generateFilterForm();
   }
@@ -102,5 +104,9 @@ export class PlanningComponent implements OnInit {
       orderDate: [null],
       deliveryDate: [null]
     })
+  }
+
+  get connectedUserRole() {
+    return this.authService$.connectedUser?.role
   }
 }

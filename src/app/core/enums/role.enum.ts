@@ -4,6 +4,7 @@ export const Role = {
   BENDER: 'BENDER',
   COMBINER: 'COMBINER',
   WELDER: 'WELDER',
+  ASSEMBLER: 'ASSEMBLER',
   FINISHER: 'FINISHER',
   PACKER: 'PACKER'
 } as const;

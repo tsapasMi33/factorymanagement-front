@@ -17,6 +17,7 @@ import {ComponentService} from "./services/component.service";
 import { ProductVariantListComponent } from './components/order/product-variant-list/product-variant-list.component';
 import {OrderService} from "./services/order.service";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import { MaterialComponent } from './components/material/material.component';
 
 
 @NgModule({
@@ -28,6 +29,7 @@ import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
     ProductFamilyComponent,
     ComponentComponent,
     ProductVariantListComponent,
+    MaterialComponent,
   ],
     imports: [
         CommonModule,

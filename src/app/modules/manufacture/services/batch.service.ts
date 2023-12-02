@@ -21,9 +21,20 @@ export class BatchService {
   }
 
   doJob(step: Step, batchId: number, action: string){
-    let params = new HttpParams();
-    params = params.append('step', step)
-    return this.http.patch<Batch>('http://localhost:8080/batch/' + batchId + '/' + action, null,{params})
+    switch (step){
+      case "CUT":
+        return this.http.patch<Batch>('http://localhost:8080/batch/' + batchId + '/' + action + '-cut', null);
+      case "BENT":
+        return this.http.patch<Batch>('http://localhost:8080/batch/' + batchId + '/' + action + '-bend', null);
+      case "COMBINED":
+        return this.http.patch<Batch>('http://localhost:8080/batch/' + batchId + '/' + action + '-combine', null);
+      case "WELDED":
+        return this.http.patch<Batch>('http://localhost:8080/batch/' + batchId + '/' + action + '-weld', null);
+      case "ASSEMBLED":
+        return this.http.patch<Batch>('http://localhost:8080/batch/' + batchId + '/' + action + '-assemble', null);
+      default:
+        throw new Error(`${step} is not a batch step!`)
+    }
   }
 
   getBatchByCode(code: string) {

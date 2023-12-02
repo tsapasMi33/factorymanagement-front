@@ -34,7 +34,7 @@ export class CutComponent implements OnInit{
     this.batchService$.getBatchesFor(page, "CUT").subscribe({
       next: value => {
         this.batches = value.content
-        this.batches.forEach(b => b.products.forEach(p => p.variant.components = p.variant.components.filter(c => c.type === 'PLATE')));
+        this.batches.forEach(b => b.products.forEach(p => p.variant.components = p.variant.components.filter(c => c.typeRequiresCutting)));
         this.collectionSize = value.totalElements;
         this.page = value.number + 1;
         this.pageSize = value.size;

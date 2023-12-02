@@ -49,9 +49,7 @@ export class ProductService {
   }
 
   doJob(step: Step, productId: number, action: string){
-    let params = new HttpParams();
-    params = params.append('step', step)
-    return this.http.patch<Product>('http://localhost:8080/product/' + productId + '/' + action, null,{params})
+    return this.http.patch<Product>('http://localhost:8080/product/' + productId + '/' + action + '-finish', null)
   }
 
   archiveAll() {

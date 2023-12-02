@@ -2,9 +2,10 @@ import {Component, EventEmitter, OnInit, Output, TemplateRef} from '@angular/cor
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {ComponentService} from "../../../services/component.service";
 import {ProductComponent} from "../../../../../core/models/product-component.model";
-import {MaterialType} from "../../../../../core/enums/material-type.enum";
 import {Material} from "../../../../../core/enums/material.enum";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {MaterialType} from "../../../../../core/models/material-type.model";
+import {MaterialTypeService} from "../../../services/material-type.service";
 
 @Component({
   selector: 'app-component',
@@ -12,9 +13,9 @@ import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
   styleUrls: ['./component.component.css']
 })
 export class ComponentComponent implements OnInit {
-  protected readonly MaterialType = MaterialType;
   protected readonly Material = Material;
   components!: ProductComponent[];
+  types!: MaterialType[];
   filteredComponents!: ProductComponent[];
   selectedComponent!: ProductComponent;
   filterForm!: FormGroup;
@@ -22,6 +23,7 @@ export class ComponentComponent implements OnInit {
   @Output() componentEmitter = new EventEmitter<ProductComponent>;
 
   constructor(private componentService$: ComponentService,
+              private materialTypeService$: MaterialTypeService,
               private fb: FormBuilder,
               private modalService: NgbModal) {
   }
@@ -38,6 +40,11 @@ export class ComponentComponent implements OnInit {
         this.filteredComponents = value;
       },
       error: err => console.error(err)
+    });
+    this.materialTypeService$.getMaterialTypes().subscribe({
+      next: value => {
+        this.types = value;
+      }
     })
   }
 
@@ -50,8 +57,7 @@ export class ComponentComponent implements OnInit {
     this.filteredComponents = this.components.filter(c => {
       return (
         (!this.filterForm.get("name")?.value || c.name.toLowerCase().includes(this.filterForm.get("name")?.value.toLowerCase())) &&
-        (!this.filterForm.get("type")?.value || c.type === this.filterForm.get("type")?.value) &&
-        (!this.filterForm.get("material")?.value || c.material === this.filterForm.get("material")?.value) &&
+        // (!this.filterForm.get("type")?.value || c.type === this.filterForm.get("type")?.value) &&
         (!this.filterForm.get("thickness")?.value || c.thickness === this.filterForm.get("thickness")?.value) &&
         (!this.filterForm.get("length")?.value || c.length === this.filterForm.get("length")?.value) &&
         (!this.filterForm.get("width")?.value || c.width === this.filterForm.get("width")?.value)
@@ -62,19 +68,23 @@ export class ComponentComponent implements OnInit {
   generateForm() {
     return this.fb.group({
       name: [null, [Validators.required]],
-      type: [null, [Validators.required]],
-      material: [null, [Validators.required]],
       thickness: [null],
       length: [null],
       width: [null],
+      type: this.fb.group({
+        id:[null]
+      }),
       price: [null, [Validators.required]]
     })
   }
 
+  get chosenType() {
+    return this.createForm.controls['type'].value; // enable/disable fields in form accordingly
+  }
+
   setFilterForm() {
     this.filterForm.get('name')?.setValue(this.selectedComponent.name);
-    this.filterForm.get('type')?.setValue(this.selectedComponent.type);
-    this.filterForm.get('material')?.setValue(this.selectedComponent.material);
+    // this.filterForm.get('type')?.setValue(this.selectedComponent.type);
     this.filterForm.get('thickness')?.setValue(this.selectedComponent.thickness);
     this.filterForm.get('length')?.setValue(this.selectedComponent.length);
     this.filterForm.get('width')?.setValue(this.selectedComponent.width);
@@ -104,6 +114,4 @@ export class ComponentComponent implements OnInit {
     this.createForm = this.generateForm();
     this.modalService.open(content);
   }
-
-
 }

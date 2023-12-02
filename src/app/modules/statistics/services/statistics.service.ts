@@ -17,11 +17,11 @@ export class StatisticsService {
 
   getStatisticsForStep(step: string, startDate: Date, endDate: Date) {
     return this.http.post<Stats>('http://localhost:8080/stats/production/step',
-      {step: step ,startDate: new Date(2023,10,32), endDate:  new Date(2023,10,32) })
+      {step: step ,startDate: startDate, endDate: endDate })
   }
 
   getStatisticsForUser(username: string, step: string, startDate: Date, endDate: Date) {
     return this.http.post<Stats>('http://localhost:8080/stats/production/step/user',
-      {username: username, step: step ,startDate: new Date(2023,10,32), endDate:  new Date(2023,10,32) })
+      {username: username, step: step ,startDate: startDate, endDate: endDate })
   }
 }

@@ -1,7 +1,7 @@
 <h2>Planning</h2>
 <hr>
 <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-  <button class="btn btn-danger me-md-2" type="button" (click)="archiveAll()">Archive All</button>
+  <button class="btn btn-danger me-md-2" type="button" (click)="archiveAll()"  *ngIf="connectedUserRole === 'ADMIN'">Archive All</button>
 </div>
 <br>
 <div>

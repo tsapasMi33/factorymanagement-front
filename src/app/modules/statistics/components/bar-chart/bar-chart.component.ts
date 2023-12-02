@@ -102,7 +102,6 @@ export class BarChartComponent {
   }
 
   public update(stats: number[], labels: string[], level: string): void {
-    console.log(stats)
     this.level = level
     if (level === 'user') {
       this.chartType = 'pie'

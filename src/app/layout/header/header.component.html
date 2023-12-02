@@ -14,34 +14,34 @@
         <li class="nav-item">
           <a class="nav-link" aria-current="page" routerLink="/manufacture/planning" routerLinkActive="active">Planning</a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item" *ngIf="connectedUserRole === 'ADMIN'">
           <a class="nav-link" aria-current="page" routerLink="/manufacture/production" routerLinkActive="active">Production</a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item" *ngIf="connectedUserRole === 'ADMIN' || connectedUserRole === 'CUTTER'">
           <a class="nav-link" aria-current="page" routerLink="/manufacture/cut" routerLinkActive="active">Cut Plates</a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item" *ngIf="connectedUserRole === 'ADMIN' || connectedUserRole === 'BENDER'">
           <a class="nav-link" aria-current="page" routerLink="/manufacture/bend" routerLinkActive="active">Bend</a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item" *ngIf="connectedUserRole === 'ADMIN' || connectedUserRole === 'COMBINER'">
           <a class="nav-link" aria-current="page" routerLink="/manufacture/combine" routerLinkActive="active">Combine</a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item" *ngIf="connectedUserRole === 'ADMIN' || connectedUserRole === 'WELDER'">
           <a class="nav-link" aria-current="page" routerLink="/manufacture/weld" routerLinkActive="active">Weld</a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item" *ngIf="connectedUserRole === 'ADMIN' || connectedUserRole === 'ASSEMBLER'">
           <a class="nav-link" aria-current="page" routerLink="/manufacture/assemble" routerLinkActive="active">Assemble</a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item" *ngIf="connectedUserRole === 'ADMIN' || connectedUserRole === 'FINISHER'">
           <a class="nav-link" aria-current="page" routerLink="/manufacture/finish" routerLinkActive="active">Finish</a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item" *ngIf="connectedUserRole === 'ADMIN' || connectedUserRole === 'PACKER'">
           <a class="nav-link" aria-current="page" routerLink="/manufacture/pack" routerLinkActive="active">Pack</a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item" *ngIf="connectedUserRole === 'ADMIN' || connectedUserRole === 'PACKER'">
           <a class="nav-link" aria-current="page" routerLink="/manufacture/ship" routerLinkActive="active">Ship</a>
         </li>
-        <li class="nav-item dropdown">
+        <li class="nav-item dropdown" *ngIf="connectedUserRole === 'ADMIN'">
           <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             Management
           </a>
@@ -49,13 +49,14 @@
             <li><a class="dropdown-item" routerLink="/management/clients">Clients</a></li>
             <li><a class="dropdown-item" routerLink="/management/orders">Orders</a></li>
             <li><a class="dropdown-item" routerLink="/management/product-variants">Products</a></li>
+            <li><a class="dropdown-item" routerLink="/management/materials">Materials</a></li>
             <li>
               <hr class="dropdown-divider">
             </li>
             <li><a class="dropdown-item" routerLink="/management/users">Users</a></li>
           </ul>
         </li>
-        <li class="nav-item dropdown">
+        <li class="nav-item dropdown"  *ngIf="connectedUserRole === 'ADMIN'">
           <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             Statistics
           </a>
