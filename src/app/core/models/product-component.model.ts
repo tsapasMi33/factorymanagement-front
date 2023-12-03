@@ -1,4 +1,5 @@
-import {Material} from "../enums/material.enum";
+
+import {MaterialType} from "./material-type.model";
 
 export interface ProductComponent {
   id: number;
@@ -7,8 +8,7 @@ export interface ProductComponent {
   length: number | null;
   width: number | null;
   price: number | null;
-  typeName: string;
-  typeMaterial: Material;
-  typeRequiresCutting: boolean;
-  typeRequiresBending: boolean;
+  requiresCutting: boolean;
+  requiresBending: boolean;
+  type: MaterialType;
 }

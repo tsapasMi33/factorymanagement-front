@@ -28,9 +28,8 @@
         <table class="table" [ngClass]="{'table-success': isBatchOngoing(batch), 'table-warning': isBatchPaused(batch)}">
           <thead>
           <tr>
+            <th>Count</th>
             <th scope="col">Part</th>
-            <th scope="col">Product</th>
-            <th scope="col">Code</th>
             <th scope="col">Material</th>
             <th scope="col">Thickness</th>
             <th scope="col">Width</th>
@@ -38,19 +37,16 @@
           </tr>
           </thead>
           <tbody>
-          <ng-container *ngFor="let product of batch.products">
-            <ng-container *ngFor="let component of product.variant.components">
+            <ng-container *ngFor="let component of batch.batchComponents.values()">
               <tr>
-                <td>{{component.name}}</td>
-                <td>{{product.variant.productFamily.name}}</td>
-                <td>{{product.variant.code}}</td>
-                <td>{{component.typeMaterial}}</td>
-                <td>{{component.thickness}}</td>
-                <td>{{component.width}}</td>
-                <td>{{component.length}}</td>
+                <td>{{component.count}}</td>
+                <td>{{component.component.name}}</td>
+                <td>{{component.component.type.material}}</td>
+                <td>{{component.component.thickness}}</td>
+                <td>{{component.component.width}}</td>
+                <td>{{component.component.length}}</td>
               </tr>
             </ng-container>
-          </ng-container>
           </tbody>
         </table>
         <p *ngIf="isBatchOngoing(batch)">by: {{getCurrentUser(batch)}}</p>

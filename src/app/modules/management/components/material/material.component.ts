@@ -38,8 +38,6 @@ export class MaterialComponent implements OnInit {
       material: [null, [Validators.required]],
       pricingMethod: [null, [Validators.required]],
       basePrice: [null],
-      requiresCutting: [null, [Validators.required]],
-      requiresBending: [null, [Validators.required]],
       hasThickness: [null, [Validators.required]],
       hasLength: [null, [Validators.required]],
       hasWidth: [null, [Validators.required]]
@@ -52,8 +50,6 @@ export class MaterialComponent implements OnInit {
     this.form.get('material')?.setValue(type.material);
     this.form.get('pricingMethod')?.setValue(type.pricingMethod);
     this.form.get('basePrice')?.setValue(type.basePrice);
-    this.form.get('requiresCutting')?.setValue(type.requiresCutting);
-    this.form.get('requiresBending')?.setValue(type.requiresBending);
     this.form.get('hasThickness')?.setValue(type.hasThickness);
     this.form.get('hasLength')?.setValue(type.hasLength);
     this.form.get('hasWidth')?.setValue(type.hasWidth);

@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {BatchService} from "../../services/batch.service";
 import {Batch} from "../../../../core/models/batch.model";
-import {Step} from "../../../../core/enums/step.enum";
+import {ProductComponent} from "../../../../core/models/product-component.model";
 
 @Component({
   selector: 'app-cut',
@@ -33,8 +33,9 @@ export class CutComponent implements OnInit{
     this.loading = true
     this.batchService$.getBatchesFor(page, "CUT").subscribe({
       next: value => {
+        value.content.forEach(b => b.batchComponents = this.mapBatchComponents(b))
         this.batches = value.content
-        this.batches.forEach(b => b.products.forEach(p => p.variant.components = p.variant.components.filter(c => c.typeRequiresCutting)));
+        this.batches.forEach(b => b.products.forEach(p => p.variant.components = p.variant.components.filter(c => c.requiresCutting)));
         this.collectionSize = value.totalElements;
         this.page = value.number + 1;
         this.pageSize = value.size;
@@ -50,13 +51,19 @@ export class CutComponent implements OnInit{
 
   onStartJob(id: number, index: number) {
     this.batchService$.doJob("CUT", id, 'start').subscribe({
-      next: value => this.batches[index] = value
+      next: value => {
+        value.batchComponents = this.mapBatchComponents(value);
+        this.batches[index] = value
+      }
     });
   }
 
   onPauseJob(id: number, index: number) {
     this.batchService$.doJob("CUT", id, 'pause').subscribe({
-      next: value => this.batches[index] = value
+      next: value => {
+        value.batchComponents = this.mapBatchComponents(value);
+        this.batches[index] = value
+      }
     });
   }
 
@@ -105,5 +112,22 @@ export class CutComponent implements OnInit{
         }
       }
     })
+  }
+
+
+  mapBatchComponents(batch: Batch) {
+    const batchMap = new Map<number, {component: ProductComponent, count: number}>()
+    batch.products.forEach( p => {
+      p.variant.components.forEach( c => {
+        if (c.requiresCutting) {
+          if (batchMap.has(c.id)) {
+            batchMap.set(c.id, {component: c, count: batchMap.get(c.id)!.count! + 1})
+          } else {
+            batchMap.set(c.id, {component: c, count: 1})
+          }
+        }
+      })
+    })
+    return [...batchMap.values()]
   }
 }

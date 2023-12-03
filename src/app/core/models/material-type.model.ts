@@ -8,8 +8,6 @@ export interface MaterialType {
   material: Material;
   pricingMethod: PricingMethod;
   basePrice: number;
-  requiresCutting: boolean;
-  requiresBending: boolean;
   hasThickness: boolean;
   hasLength: boolean;
   hasWidth: boolean;
