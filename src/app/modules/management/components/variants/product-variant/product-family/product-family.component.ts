@@ -1,9 +1,10 @@
 import {Component, EventEmitter, OnInit, Output, TemplateRef} from '@angular/core';
-import {ProductFamily} from "../../../../../core/models/product-family.model";
-import {ProductFamilyService} from "../../../services/product-family.service";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {FormArray, FormControl, FormGroup} from "@angular/forms";
-import {Step} from "../../../../../core/enums/step.enum";
+import {ProductFamily} from "../../../../../../core/models/product-family.model";
+import {ProductFamilyService} from "../../../../services/product-family.service";
+import {Step} from "../../../../../../core/enums/step.enum";
+
 
 @Component({
   selector: 'app-product-family',

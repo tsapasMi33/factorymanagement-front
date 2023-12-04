@@ -53,7 +53,7 @@ export class OrderComponent implements OnInit {
     }
   }
 
-  getControl(orderLine: AbstractControl<any>) {
+  getFormArrayControl(orderLine: AbstractControl<any>) {
     return orderLine as FormGroup;
   }
 

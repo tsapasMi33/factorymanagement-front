@@ -40,7 +40,7 @@
     <hr>
       <ng-container formArrayName="products">
         <ng-container *ngFor="let orderLine of productsFormArray.controls; let i = index">
-          <form [formGroup]="getControl(orderLine)">
+          <form [formGroup]="getFormArrayControl(orderLine)">
           <div class="input-group mb-3">
             <input type="text" class="form-control" value="{{(orderLine.get('variant')?.value).code}}" disabled>
             <span class="input-group-text">Qty</span>

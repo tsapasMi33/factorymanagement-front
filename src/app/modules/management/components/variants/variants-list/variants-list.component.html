@@ -1,0 +1,96 @@
+<div>
+  <form [formGroup]="filterForm" (ngSubmit)="onFilter()">
+    <table class="table table-hover">
+      <thead>
+      <tr class="table-dark">
+        <th scope="col">
+          <select class="form-select-sm" formControlName="family" *ngIf="!loading">
+            <option [value]=null selected>All</option>
+            <ng-container *ngFor="let family of familiesPresent">
+              <option value="{{family.id}}">{{family.name}}</option>
+            </ng-container>
+          </select>
+        </th>
+        <th scope="col">
+          <input class="form-control form-control-sm" type="text" formControlName="code">
+        </th>
+        <th scope="col">
+          <select class="form-select-sm" formControlName="material">
+            <option [value]=null selected>All</option>
+            <option value="T304">T304</option>
+            <option value="T340">T430</option>
+            <option value="OTHER">OTHER</option>
+          </select>
+        </th>
+        <th scope="col">
+          <input class="form-control form-control-sm" type="number" formControlName="length">
+        </th>
+        <th scope="col">
+          <input class="form-control form-control-sm" type="number" formControlName="width">
+        </th>
+        <th scope="col">
+          <input class="form-control form-control-sm" type="number" formControlName="height">
+        </th>
+
+        <th scope="col">
+          <div class="btn-group" role="group">
+          <button class="btn btn-primary" type="submit">Apply</button>
+          <button class="btn btn-secondary" type="reset" (click)="reset()">Reset</button>
+          </div>
+        </th>
+      </tr>
+      <tr class="table-dark">
+        <th scope="col">Family</th>
+        <th scope="col">Code</th>
+        <th scope="col">Material</th>
+        <th scope="col">Length</th>
+        <th scope="col">Width</th>
+        <th scope="col">Height</th>
+        <th scope="col">Price</th>
+      </tr>
+      </thead>
+      <tbody *ngIf="!loading; else load">
+      <tr *ngFor="let variant of filteredVariants" (click)="open(modal, variant)" style="cursor: pointer">
+        <td>{{variant.productFamily.name}}</td>
+        <td>{{variant.code}}</td>
+        <td>{{variant.material}}</td>
+        <td>{{variant.length}}</td>
+        <td>{{variant.width}}</td>
+        <td>{{variant.height}}</td>
+        <td>{{variant.price | currency : 'EUR'}}</td>
+      </tr>
+      </tbody>
+    </table>
+  </form>
+  <ng-template #load>
+    <tbody>
+    <tr *ngFor="let v of filteredVariants">
+      <td colspan="10"><span class="placeholder col-12"></span></td>
+    </tr>
+    </tbody>
+  </ng-template>
+</div>
+
+
+<ng-template #modal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Create Component</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <form [formGroup]="updatePriceForm" (ngSubmit)="update(modal)">
+    <div class="modal-body">
+      <div class="input-group mb-3">
+        <span class="input-group-text">Variant</span>
+        <input type="text" class="form-control" [value]="selectedVariant.code" disabled>
+      </div>
+      <div class="input-group mb-3">
+        <span class="input-group-text">Price</span>
+        <input type="number" class="form-control" formControlName="price">
+      </div>
+
+      </div>
+    <div class="modal-footer">
+      <button type="submit" class="btn btn-outline-success">Update</button>
+    </div>
+  </form>
+</ng-template>
