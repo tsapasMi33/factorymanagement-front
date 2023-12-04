@@ -7,75 +7,80 @@
   </div>
 </ng-container>
 <form [formGroup]="productVariantForm">
-  <div class="container-fluid vh-75">
+
+
     <div class="row">
-      <div class="col-4">
+
+      <div class="col-5">
         <app-product-family (productFamilyIdEmitter)="setFamily($event)"></app-product-family>
-      </div>
-      <div class="col-8">
         <app-component (componentEmitter)="addComponent($event)"></app-component>
       </div>
-    </div>
-    <div class="row">
-      <hr>
-      <h4>New Product Variant</h4>
-      <hr>
-      <div class="col-6">
-        <div class="input-group mb-3">
-          <span class="input-group-text">Material</span>
-          <select class="form-select" formControlName="material">
-            <option value="T304">{{Material.T304}}</option>
-            <option value="T430">{{Material.T430}}</option>
-            <option value="OTHER">{{Material.OTHER}}</option>
-          </select>
-          <ng-template #infoVariantIdentifier>
-            <p>Alignment<br>
-              C: central, L: Left, R: Right
-            </p>
-            <p>
-            Sub tablets<br>
-              NST: No, 1ST: 1, 2ST: 2
-            </p>
-            <p>
-            Washtable<br>
-              S: Single, D: Double
-            </p>
-          </ng-template>
-          <span class="input-group-text" [ngbTooltip]="infoVariantIdentifier">Variant Identifier</span>
-          <input type="text" class="form-control" formControlName="variantIdentifier">
-          <span class="input-group-text">Price</span>
-          <input type="number" class="form-control" formControlName="price">
-        </div>
-        <div class="input-group mb-3">
-          <span class="input-group-text">L [mm]</span>
-          <input type="number" class="form-control" formControlName="length">
-          <span class="input-group-text">W [mm]</span>
-          <input type="number" class="form-control" formControlName="width">
-          <span class="input-group-text">H [mm]</span>
-          <input type="number" class="form-control" formControlName="height">
-        </div>
-        <div class="mb-3">
-          <label for="exampleFormControlTextarea1" class="form-label">Description</label>
-          <textarea class="form-control" id="exampleFormControlTextarea1" rows="4"
-                    formControlName="description"></textarea>
-        </div>
-      </div>
-      <div class="col-6">
-        <h6>Components</h6>
-        <hr>
-        <ng-container *ngFor="let component of componentsArray.controls; index as i">
-          <p style="display: inline-block">
+
+      <div class="col-7">
+
+          <h4>New Product Variant</h4>
+          <hr>
+            <div class="input-group mb-3">
+              <span class="input-group-text">Material</span>
+              <select class="form-select" formControlName="material">
+                <option value="T304">{{Material.T304}}</option>
+                <option value="T430">{{Material.T430}}</option>
+                <option value="OTHER">{{Material.OTHER}}</option>
+              </select>
+              <ng-template #infoVariantIdentifier>
+                <p>Alignment<br>
+                  C: central, L: Left, R: Right
+                </p>
+                <p>
+                  Sub tablets<br>
+                  NST: No, 1ST: 1, 2ST: 2
+                </p>
+                <p>
+                  Washtable<br>
+                  S: Single, D: Double
+                </p>
+              </ng-template>
+              <span class="input-group-text" [ngbTooltip]="infoVariantIdentifier">Variant Identifier</span>
+              <input type="text" class="form-control" formControlName="variantIdentifier">
+              <span class="input-group-text">Price</span>
+              <input type="number" class="form-control" formControlName="price">
+            </div>
+            <div class="input-group mb-3">
+              <span class="input-group-text">L [mm]</span>
+              <input type="number" class="form-control" formControlName="length">
+              <span class="input-group-text">W [mm]</span>
+              <input type="number" class="form-control" formControlName="width">
+              <span class="input-group-text">H [mm]</span>
+              <input type="number" class="form-control" formControlName="height">
+            </div>
+            <div class="mb-3">
+              <label for="exampleFormControlTextarea1" class="form-label">Description</label>
+              <textarea class="form-control" id="exampleFormControlTextarea1" rows="4"
+                        formControlName="description"></textarea>
+            </div>
+            <h6>Components</h6>
+            <hr>
+            <ng-container *ngFor="let component of componentsArray.controls; index as i">
+              <p style="display: inline-block">
           <span class="badge text-bg-secondary">{{component.value.name}}
             <button type="button" class="btn btn-secondary" (click)="componentsArray.removeAt(i)">x</button>
           </span>
-          </p>
-        </ng-container>
+              </p>
+            </ng-container>
+
+
+
+        <div class="row">
+          <div class="col-12 text-end">
+            <button class="btn btn-lg btn-outline-success" [disabled]="productVariantForm.invalid" (click)="create()">Create</button>
+          </div>
+        </div>
+
+
       </div>
+
     </div>
-    <div class="row">
-      <div class="col-12 text-end">
-        <button class="btn btn-lg btn-outline-success" [disabled]="productVariantForm.invalid" (click)="create()">Create</button>
-      </div>
-    </div>
-  </div>
+
+
+
 </form>

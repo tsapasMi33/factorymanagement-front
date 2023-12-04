@@ -35,7 +35,6 @@ export class CutComponent implements OnInit{
       next: value => {
         value.content.forEach(b => b.batchComponents = this.mapBatchComponents(b))
         this.batches = value.content
-        this.batches.forEach(b => b.products.forEach(p => p.variant.components = p.variant.components.filter(c => c.requiresCutting)));
         this.collectionSize = value.totalElements;
         this.page = value.number + 1;
         this.pageSize = value.size;

@@ -7,7 +7,7 @@ import { ProductVariantComponent } from './components/product-variant/product-va
 import { OrderComponent } from './components/order/order.component';
 import { UserComponent } from './components/user/user.component';
 import {ClientService} from "./services/client.service";
-import {ReactiveFormsModule} from "@angular/forms";
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {UserService} from "./services/user.service";
 import { ProductFamilyComponent } from './components/product-variant/product-family/product-family.component';
 import { ComponentComponent } from './components/product-variant/component/component.component';
@@ -36,7 +36,8 @@ import { MaterialComponent } from './components/material/material.component';
         ManagementRoutingModule,
         ReactiveFormsModule,
         ManufactureModule,
-        NgbTooltip
+        NgbTooltip,
+        FormsModule
     ],
   providers: [
     ClientService,

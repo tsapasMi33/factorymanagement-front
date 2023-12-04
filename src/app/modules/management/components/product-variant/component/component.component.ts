@@ -6,7 +6,6 @@ import {Material} from "../../../../../core/enums/material.enum";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {MaterialType} from "../../../../../core/models/material-type.model";
 import {MaterialTypeService} from "../../../services/material-type.service";
-import {BehaviorSubject} from "rxjs";
 
 @Component({
   selector: 'app-component',
@@ -19,9 +18,9 @@ export class ComponentComponent implements OnInit {
   types!: MaterialType[];
   filteredComponents!: ProductComponent[];
   selectedComponent!: ProductComponent;
-  filterForm!: FormGroup;
-  createForm!: FormGroup
-  createFormChosenType = new BehaviorSubject<null|MaterialType>(null)
+  createForm!: FormGroup;
+
+  searchField = ""
 
   @Output() componentEmitter = new EventEmitter<ProductComponent>;
 
@@ -32,7 +31,6 @@ export class ComponentComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.filterForm = this.generateForm()
     this.load()
   }
 
@@ -51,23 +49,6 @@ export class ComponentComponent implements OnInit {
     })
   }
 
-  selectComponent(component: ProductComponent) {
-    this.selectedComponent = component;
-    this.setFilterForm();
-  }
-
-  applyFilter() {
-    this.filteredComponents = this.components.filter(c => {
-      return (
-        (!this.filterForm.get("name")?.value || c.name.toLowerCase().includes(this.filterForm.get("name")?.value.toLowerCase())) &&
-        (!this.chosenFilterType.get('id')?.value || c.type.id === +this.chosenFilterType.get('id')?.value) &&
-        (!this.filterForm.get("thickness")?.value || c.thickness === this.filterForm.get("thickness")?.value) &&
-        (!this.filterForm.get("length")?.value || c.length === this.filterForm.get("length")?.value) &&
-        (!this.filterForm.get("width")?.value || c.width === this.filterForm.get("width")?.value)
-      );
-    });
-  }
-
   generateForm() {
     return this.fb.group({
       name: [null, [Validators.required]],
@@ -81,26 +62,6 @@ export class ComponentComponent implements OnInit {
       requiresCutting: [false, [Validators.required]],
       requiresBending: [false, [Validators.required]]
     })
-  }
-
-  get chosenFilterType() {
-    return this.filterForm.get('type') as FormGroup
-  }
-
-  setFilterForm() {
-    this.filterForm.get('name')?.setValue(this.selectedComponent.name);
-    this.chosenFilterType.get('id')?.setValue(this.selectedComponent.type.id);
-    this.filterForm.get('thickness')?.setValue(this.selectedComponent.thickness);
-    this.filterForm.get('length')?.setValue(this.selectedComponent.length);
-    this.filterForm.get('width')?.setValue(this.selectedComponent.width);
-    this.filterForm.get('price')?.setValue(this.selectedComponent.price);
-    this.filterForm.get('requiresCutting')?.setValue(this.selectedComponent.requiresCutting);
-    this.filterForm.get('requiresBending')?.setValue(this.selectedComponent.requiresBending);
-  }
-
-  reset() {
-    this.filteredComponents = this.components
-    this.filterForm = this.generateForm();
   }
 
   create(modal: any) {
@@ -148,6 +109,14 @@ export class ComponentComponent implements OnInit {
       this.createForm.get('price')?.disable()
     } else {
       this.createForm.get('price')?.enable()
+    }
+  }
+
+  search() {
+    if (this.searchField.trim() === ''){
+      this.filteredComponents = this.components
+    } else {
+      this.filteredComponents = this.components.filter(c => c.name.toLowerCase().includes(this.searchField.toLowerCase()))
     }
   }
 }

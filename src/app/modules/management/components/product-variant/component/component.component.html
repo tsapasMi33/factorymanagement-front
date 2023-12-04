@@ -1,56 +1,44 @@
 <h4>Components</h4>
 <hr>
-<form [formGroup]="filterForm">
   <div class="row">
     <div class="col-4">
-      <div class="input-group mb-3">
-        <button class="btn btn-success btn" (click)="applyFilter()">Filter</button>
-        <button class="btn btn-secondary btn" (click)="reset()">Reset</button>
-        <button class="btn btn-primary btn" (click)="open(modal)">Create</button>
-      </div>
-    </div>
-    <div class="col-8">
-      <div class="input-group mb-3">
-        <span class="input-group-text">Name</span>
-        <input type="text" class="form-control" formControlName="name">
-        <span class="input-group-text">Price</span>
-        <input type="number" class="form-control" formControlName="price">
-      </div>
+
     </div>
   </div>
   <div class="row d-flex">
-    <div class="col-4">
-      <select class="form-select" size="10" formGroupName="type">
+    <div class="col-5 text-center">
+      <div class="form-floating mb-3">
+        <input type="text" class="form-control" id="search" placeholder="Search" [(ngModel)]="searchField" (input)="search()">
+        <label for="search">Search</label>
+      </div>
+      <select class="form-select" size="10">
         <ng-container *ngFor="let component of filteredComponents">
-          <option [value]="component.id" (click)="selectComponent(component)">[{{component.type.material}}]{{component.name}}({{component.length}}x{{component.width}}x{{component.thickness}})</option>
+          <option [value]="component.id" (click)="selectedComponent = component">[{{component.type.material}}
+            ]{{component.name}}({{component.length}}x{{component.width}}x{{component.thickness}})
+          </option>
         </ng-container>
       </select>
-    </div>
-    <div class="col-8">
-      <div class="input-group mb-3">
-        <span class="input-group-text">Type</span>
-        <ng-container formGroupName="type">
-        <select class="form-select" formControlName="id">
-          <ng-container *ngFor="let type of types">
-            <option [value]="type.id">{{type.name}}[{{type.material}}]</option>
-          </ng-container>
-        </select>
-        </ng-container>
-        <span class="input-group-text">Thickness [<sup>mm</sup>&frasl;<sub>10</sub>]</span>
-        <input type="number" class="form-control" formControlName="thickness">
+      <div class="btn-group" role="group" aria-label="Basic example">
+        <button class="btn btn-primary btn" (click)="open(modal)">Create</button>
+        <button type="button" class="btn btn-outline-danger">Update</button>
       </div>
-      <div class="input-group mb-3">
-        <span class="input-group-text">Length [mm]</span>
-        <input type="number" class="form-control" formControlName="length">
-        <span class="input-group-text">Width [mm]</span>
-        <input type="number" class="form-control" formControlName="width">
+    </div>
+    <div class="col-7" *ngIf="selectedComponent">
+      <div class="card" style="width: 22rem;">
+        <div class="card-header">
+          {{selectedComponent.name}}
+        </div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item">An item</li>
+          <li class="list-group-item">A second item</li>
+          <li class="list-group-item">A third item</li>
+        </ul>
       </div>
       <div class="row text-center">
         <button class="btn btn-lg btn-primary" (click)="addToProduct()">Add To Product</button>
       </div>
     </div>
   </div>
-</form>
 
 
 <ng-template #modal let-modal>
@@ -69,11 +57,11 @@
       <div class="input-group mb-3">
         <span class="input-group-text">Type</span>
         <ng-container formGroupName="type">
-        <select class="form-select w-25" formControlName="id" (change)="chosenType()">
-          <ng-container *ngFor="let type of types">
-            <option [value]="type.id">{{type.name}}[{{type.material}}]</option>
-          </ng-container>
-        </select>
+          <select class="form-select w-25" formControlName="id" (change)="chosenType()">
+            <ng-container *ngFor="let type of types">
+              <option [value]="type.id">{{type.name}}[{{type.material}}]</option>
+            </ng-container>
+          </select>
         </ng-container>
         <span class="input-group-text">Thickness [<sup>mm</sup>&frasl;<sub>10</sub>]</span>
         <input type="number" class="form-control" formControlName="thickness">
@@ -87,11 +75,13 @@
       <div class="input-group mb-3">
         <div class="form-check form-switch">
           <label class="form-check-label" for="requiresCutting">Cutting ?</label>
-          <input class="form-check-input" type="checkbox" role="switch" id="requiresCutting" formControlName="requiresCutting">
+          <input class="form-check-input" type="checkbox" role="switch" id="requiresCutting"
+                 formControlName="requiresCutting">
         </div>
         <div class="form-check form-switch">
           <label class="form-check-label" for="requiresBending">Bending ?</label>
-          <input class="form-check-input" type="checkbox" role="switch" id="requiresBending" formControlName="requiresBending">
+          <input class="form-check-input" type="checkbox" role="switch" id="requiresBending"
+                 formControlName="requiresBending">
         </div>
 
       </div>

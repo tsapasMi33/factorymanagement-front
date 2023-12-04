@@ -7,7 +7,7 @@
 </div>
 <div class="row d-flex">
   <div class="col-8">
-    <select class="form-select" size="10">
+    <select class="form-select" size="8">
       <ng-container *ngFor="let productFamily of productFamilies">
         <option [value]="productFamily.id" (click)="selectFamily(productFamily)">{{productFamily.name}}</option>
       </ng-container>
