@@ -67,7 +67,7 @@
                       + (componentLine.get('component')?.value).thickness + ')'
 " disabled>
               <span class="input-group-text">Qty</span>
-              <input type="number" class="form-control" formControlName="quantity">
+              <input type="number" class="form-control" formControlName="quantity" (change)="calculateCost()">
               <button class="btn btn-outline-danger" (click)="removeComponent(i)">x</button>
             </div>
           </form>

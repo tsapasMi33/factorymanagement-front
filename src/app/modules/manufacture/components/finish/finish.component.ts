@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {ProductService} from "../../services/product.service";
 import {Product} from "../../../../core/models/product.model";
-import {Batch} from "../../../../core/models/batch.model";
+import {AuthService} from "../../../../services/auth.service";
 
 @Component({
   selector: 'app-finish',
@@ -22,7 +22,8 @@ export class FinishComponent implements OnInit {
 
   public loading = false;
 
-  constructor(private productService$: ProductService) {
+  constructor(private productService$: ProductService,
+              private authService$: AuthService) {
   }
 
   ngOnInit(): void {
@@ -105,5 +106,30 @@ export class FinishComponent implements OnInit {
         }
       }
     })
+  }
+
+
+  disableButton(product: Product, action: string) {
+    if (action === 'start') {
+      if (this.isProductOngoing(product) ||
+        (this.isProductPaused(product) && this.getCurrentUser(product) !== this.authService$.connectedUser?.username)) {
+        return true;
+      }
+      return false;
+    } else if (action === 'pause') {
+      if (this.isProductPaused(product) ||
+        !this.isProductOngoing(product) ||
+        (this.isProductOngoing(product) && this.getCurrentUser(product) !== this.authService$.connectedUser?.username)){
+        return true;
+      }
+      return false;
+    } else {
+      if (!this.isProductOngoing(product) ||
+        this.isProductPaused(product) ||
+        (this.isProductOngoing(product) && this.getCurrentUser(product) !== this.authService$.connectedUser?.username)) {
+        return true;
+      }
+      return false;
+    }
   }
 }

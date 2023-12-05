@@ -35,9 +35,9 @@
       <p *ngIf="isProductOngoing(product)">by: {{getCurrentUser(product)}}</p>
       <div class="card-footer text-center">
         <div class="btn-group" role="group">
-          <button type="button" class="btn btn-success" (click)="onStartJob(product.id, i)" [disabled]="isProductOngoing(product)">&#9658;</button>
-          <button type="button" class="btn btn-warning" (click)="onPauseJob(product.id, i)" [disabled]="isProductPaused(product) || !isProductOngoing(product)">&#10074;&#10074;</button>
-          <button type="button" class="btn btn-danger" (click)="onFinishJob(product.id, i)" [disabled]="!isProductOngoing(product) || isProductPaused(product)">&#9724;</button>
+          <button type="button" class="btn btn-success" (click)="onStartJob(product.id, i)" [disabled]="disableButton(product, 'start')">&#9658;</button>
+          <button type="button" class="btn btn-warning" (click)="onPauseJob(product.id, i)" [disabled]="disableButton(product, 'pause')">&#10074;&#10074;</button>
+          <button type="button" class="btn btn-danger" (click)="onFinishJob(product.id, i)" [disabled]="disableButton(product, 'stop')">&#9724;</button>
         </div>
       </div>
     </div>

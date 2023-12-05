@@ -68,6 +68,7 @@ export class NewVariantComponent implements OnInit {
   }
 
   create() {
+    this.totalCost = 0;
     const mappedComponents = this.componentsFormArray.controls.map((c) => {
       const { id } = c.get('component')?.value
       const quantity = c.get('quantity')?.value;

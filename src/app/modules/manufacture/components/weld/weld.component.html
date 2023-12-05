@@ -52,9 +52,9 @@
       </div>
       <div class="card-footer text-center">
         <div class="btn-group" role="group">
-          <button type="button" class="btn btn-success" (click)="onStartJob(batch.id, i)" [disabled]="isBatchOngoing(batch)">&#9658;</button>
-          <button type="button" class="btn btn-warning" (click)="onPauseJob(batch.id, i)" [disabled]="isBatchPaused(batch) || !isBatchOngoing(batch)">&#10074;&#10074;</button>
-          <button type="button" class="btn btn-danger" (click)="onFinishJob(batch.id, i)" [disabled]="!isBatchOngoing(batch) || isBatchPaused(batch)">&#9724;</button>
+          <button type="button" class="btn btn-success" (click)="onStartJob(batch.id, i)" [disabled]="disableButton(batch, 'start')">&#9658;</button>
+          <button type="button" class="btn btn-warning" (click)="onPauseJob(batch.id, i)" [disabled]="disableButton(batch, 'pause')">&#10074;&#10074;</button>
+          <button type="button" class="btn btn-danger" (click)="onFinishJob(batch.id, i)" [disabled]="disableButton(batch, 'stop')">&#9724;</button>
         </div>
       </div>
     </div>

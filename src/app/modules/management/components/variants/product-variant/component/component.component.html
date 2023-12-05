@@ -33,7 +33,7 @@
           <li class="list-group-item">Material: {{selectedComponent.type.material}}</li>
           <li class="list-group-item" *ngIf="selectedComponent.type.hasLength">Length: {{selectedComponent.length}}mm</li>
           <li class="list-group-item" *ngIf="selectedComponent.type.hasWidth">Width: {{selectedComponent.width}}mm </li>
-          <li class="list-group-item" *ngIf="selectedComponent.type.hasThickness">Thickness: <sup>{{selectedComponent.thickness}}</sup>&frasl;<sub>10</sub></li>
+          <li class="list-group-item" *ngIf="selectedComponent.type.hasThickness">Thickness: <sup>{{selectedComponent.thickness}}</sup>&frasl;<sub>10</sub>mm</li>
           <li class="list-group-item">Price:  {{selectedComponent.price | currency : 'EUR'}}</li>
         </ul>
       </div>

@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import {Batch} from "../../../../core/models/batch.model";
 import {BatchService} from "../../services/batch.service";
+import {AuthService} from "../../../../services/auth.service";
 
 @Component({
   selector: 'app-weld',
@@ -21,7 +22,8 @@ export class WeldComponent {
 
   public loading = false;
 
-  constructor(private batchService$: BatchService) {
+  constructor(private batchService$: BatchService,
+              private authService$: AuthService) {
   }
 
   ngOnInit(): void {
@@ -104,5 +106,29 @@ export class WeldComponent {
         }
       }
     })
+  }
+
+  disableButton(batch: Batch, action: string) {
+    if (action === 'start') {
+      if (this.isBatchOngoing(batch) ||
+        (this.isBatchPaused(batch) && this.getCurrentUser(batch) !== this.authService$.connectedUser?.username)) {
+        return true;
+      }
+      return false;
+    } else if (action === 'pause') {
+      if (this.isBatchPaused(batch) ||
+        !this.isBatchOngoing(batch) ||
+        (this.isBatchOngoing(batch) && this.getCurrentUser(batch) !== this.authService$.connectedUser?.username)){
+        return true;
+      }
+      return false;
+    } else {
+      if (!this.isBatchOngoing(batch) ||
+        this.isBatchPaused(batch) ||
+        (this.isBatchOngoing(batch) && this.getCurrentUser(batch) !== this.authService$.connectedUser?.username)) {
+        return true;
+      }
+      return false;
+    }
   }
 }
