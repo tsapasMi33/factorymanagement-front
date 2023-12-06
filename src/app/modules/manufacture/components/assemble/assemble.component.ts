@@ -72,17 +72,17 @@ export class AssembleComponent {
   }
 
   isBatchOngoing(batch: Batch) {
-    let status: boolean | undefined = batch.products[0].steps.filter(s => s.step === 'ASSEMBLED')[0]?.paused;
+    let status: boolean | undefined = batch.products[0].steps.filter(s => s.step === 'ASSEMBLED' && !s.finished)[0]?.paused;
     return status === false
   }
 
   isBatchPaused(batch: Batch) {
-    let status: boolean | undefined = batch.products[0].steps.filter(s => s.step === 'ASSEMBLED')[0]?.paused;
+    let status: boolean | undefined = batch.products[0].steps.filter(s => s.step === 'ASSEMBLED' && !s.finished)[0]?.paused;
     return status === true
   }
 
   getCurrentUser(batch: Batch) {
-    return batch.products[0].steps.filter(s => s.step === 'ASSEMBLED')[0]?.createdBy.username
+    return batch.products[0].steps.filter(s => s.step === 'ASSEMBLED' && !s.finished)[0]?.createdBy.username
   }
 
 

@@ -1,8 +1,8 @@
 import {Component, ViewChild} from '@angular/core';
 
-import {StatisticsService} from "../services/statistics.service";
-import {BarChartComponent} from "../components/bar-chart/bar-chart.component";
-import {Stats} from "../../../core/models/stats.model";
+import {StatisticsService} from "../../services/statistics.service";
+import {BarChartComponent} from "../bar-chart/bar-chart.component";
+import {Stats} from "../../../../core/models/stats.model";
 import {NgbCalendar, NgbDate, NgbDateStruct} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({

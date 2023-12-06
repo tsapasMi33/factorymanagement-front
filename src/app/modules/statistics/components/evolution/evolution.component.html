@@ -1,0 +1,34 @@
+<h2>Evolution</h2>
+<hr>
+<div class="row">
+  <div class="col-2">
+    <form [formGroup]="form" (ngSubmit)="getData()">
+      <label for="mode">Mode:</label>
+      <select class="form-select" id="mode" formControlName="comparison">
+        <option [value]="false" selected>Simple</option>
+        <option [value]="true">Comparison</option>
+      </select>
+
+      <label for="period">Period:</label>
+      <select class="form-select" id="period" formControlName="periodSpan">
+        <option [value]="1" selected>Month</option>
+        <option [value]="3">Trimester</option>
+        <option [value]="6">Semester</option>
+      </select>
+
+      <div class="d-grid gap-2">
+        <button class="btn btn-primary" type="submit">Show Stats</button>
+      </div>
+    </form>
+
+  </div>
+
+  <div class="col-10">
+    <div class="chart-container">
+      <app-line-chart #chart></app-line-chart>
+    </div>
+  </div>
+</div>
+
+
+
