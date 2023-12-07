@@ -2,6 +2,7 @@ import {Component, EventEmitter, Output, ViewChild} from '@angular/core';
 import {BaseChartDirective} from "ng2-charts";
 import {ChartConfiguration, ChartData, ChartEvent, ChartType} from "chart.js";
 import DataLabelsPlugin from "chartjs-plugin-datalabels";
+import {Benefit} from "../../../../core/models/Benefit.model";
 
 @Component({
   selector: 'app-bar-chart',
@@ -75,10 +76,10 @@ export class BarChartComponent {
     },
   };
   public pieChartData: ChartData<'pie', number[], string | string[]> = {
-    labels: [['Download', 'Sales'], ['In', 'Store', 'Sales'], 'Mail Sales'],
+    labels: [],
     datasets: [
       {
-        data: [300, 500, 100],
+        data: [], label:''
       },
     ],
   };
@@ -101,7 +102,7 @@ export class BarChartComponent {
     }
   }
 
-  public update(stats: number[], labels: string[], level: string): void {
+  public updateProduction(stats: number[], labels: string[], level: string): void {
     this.level = level
     if (level === 'user') {
       this.chartType = 'pie'
@@ -122,4 +123,33 @@ export class BarChartComponent {
     this.chart?.update();
   }
 
+  updateBenefit(value: Benefit, level: string) {
+    this.level = level
+    this.barChartData.labels = value.labels
+    this.barChartData.datasets = []
+
+    const datasetCatalog :{data: number[], backgroundColor: string[], label: string} = {data: [], backgroundColor: ['hsla(0, 100%, 50%, 0.7)'], label: 'Catalog Price'}
+    for (const label of this.barChartData.labels) {
+      // @ts-ignore
+      datasetCatalog.data.push(value.catalogPrice[label])
+    }
+    this.barChartData.datasets.push(datasetCatalog)
+
+    const datasetSell :{data: number[], backgroundColor: string[], label: string} = {data: [], backgroundColor: ['hsla(23,100%,50%,0.7)'], label: 'Sell Price'}
+    for (const label of this.barChartData.labels) {
+      // @ts-ignore
+      datasetSell.data.push(value.sellPrice[label])
+    }
+    this.barChartData.datasets.push(datasetSell)
+
+
+    const datasetCost :{data: number[], backgroundColor: string[], label: string} = {data: [], backgroundColor: ['hsla(255,100%,50%,0.7)'], label: 'Production Cost'}
+    for (const label of this.barChartData.labels) {
+      // @ts-ignore
+      datasetCost.data.push(value.productionCost[label])
+    }
+    this.barChartData.datasets.push(datasetCost)
+
+    this.chart?.update()
+  }
 }

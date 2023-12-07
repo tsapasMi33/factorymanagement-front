@@ -4,7 +4,6 @@ import {StatisticsService} from "../../services/statistics.service";
 import {BarChartComponent} from "../bar-chart/bar-chart.component";
 import {Stats} from "../../../../core/models/stats.model";
 import {NgbCalendar, NgbDate, NgbDateStruct} from "@ng-bootstrap/ng-bootstrap";
-import {CachedStats} from "../../../../core/models/cached-stats.model";
 
 @Component({
   selector: 'app-production-statistics',
@@ -79,7 +78,7 @@ export class ProductionStatisticsComponent {
     this.statsService$.getProductionStatistics(startDate, endDate).subscribe({
       next: value => {
         this._cache = {data: value, parent: null, children: new Map(), level: 'top', concerns: 'all'}
-        this.chart.update(this._cache.data.stats, this._cache.data.labels, this._cache.level)
+        this.chart.updateProduction(this._cache.data.stats, this._cache.data.labels, this._cache.level)
         this.ready = true;
       }
     })
@@ -90,7 +89,7 @@ export class ProductionStatisticsComponent {
     if (this.chart.level === 'top') {
       if (this._cache.children.has($event)) {
         this._cache = this._cache.children.get($event)!;
-        this.chart.update(this._cache.data.stats, this._cache.data.labels, this._cache.level)
+        this.chart.updateProduction(this._cache.data.stats, this._cache.data.labels, this._cache.level)
       } else {
         this.statsService$.getStatisticsForStep($event, this._cache.data.startDate, this._cache.data.endDate).subscribe({
           next: value => {
@@ -103,14 +102,14 @@ export class ProductionStatisticsComponent {
             }
             this._cache.children.set($event, cache)
             this._cache = cache;
-            this.chart.update(this._cache.data.stats, this._cache.data.labels, this._cache.level)
+            this.chart.updateProduction(this._cache.data.stats, this._cache.data.labels, this._cache.level)
           }
         })
       }
     } else {
       if (this._cache.children.has($event)) {
         this._cache = this._cache.children.get($event)!;
-        this.chart.update(this._cache.data.stats, this._cache.data.labels, this._cache.level)
+        this.chart.updateProduction(this._cache.data.stats, this._cache.data.labels, this._cache.level)
       } else {
         this.statsService$.getStatisticsForUser($event, this._cache.concerns, this._cache.data.startDate, this._cache.data.endDate).subscribe({
           next: value => {
@@ -123,7 +122,7 @@ export class ProductionStatisticsComponent {
             }
             this._cache.children.set($event, cache)
             this._cache = cache;
-            this.chart.update(this._cache.data.stats, this._cache.data.labels, this._cache.level)
+            this.chart.updateProduction(this._cache.data.stats, this._cache.data.labels, this._cache.level)
           }
         })
       }
@@ -147,9 +146,16 @@ export class ProductionStatisticsComponent {
   goBack() {
     if (this._cache.parent !== null) {
       this._cache = this._cache.parent
-      this.chart.update(this._cache.data.stats, this._cache.data.labels, this._cache.level)
+      this.chart.updateProduction(this._cache.data.stats, this._cache.data.labels, this._cache.level)
     }
   }
 }
 
 
+interface CachedStats {
+  level: string;
+  concerns: string
+  data: Stats;
+  parent: CachedStats | null;
+  children: Map<string, CachedStats>
+}

@@ -3,6 +3,7 @@ import {HttpClient, HttpParams} from "@angular/common/http";
 import {Stats} from "../../../core/models/stats.model";
 import {Step} from "../../../core/enums/step.enum";
 import {Evolution} from "../../../core/models/evolution.model";
+import {Benefit} from "../../../core/models/Benefit.model";
 
 @Injectable({
   providedIn: 'root'
@@ -35,6 +36,11 @@ export class StatisticsService {
   }
 
   getBenefitStats() {
+    return this.http.get<Benefit>('http://localhost:8080/stats/benefit')
+  }
 
+  getBenefitStatsFor($event: string) {
+    let arg = $event.replace(' ', '-')
+    return this.http.get<Benefit>('http://localhost:8080/stats/benefit/' + arg)
   }
 }
