@@ -33,4 +33,8 @@ export class StatisticsService {
   getWorkload() {
     return this.http.get<Stats>('http://localhost:8080/stats/workload')
   }
+
+  getBenefitStats() {
+
+  }
 }

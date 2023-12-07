@@ -4,6 +4,7 @@ import {StatisticsService} from "../../services/statistics.service";
 import {BarChartComponent} from "../bar-chart/bar-chart.component";
 import {Stats} from "../../../../core/models/stats.model";
 import {NgbCalendar, NgbDate, NgbDateStruct} from "@ng-bootstrap/ng-bootstrap";
+import {CachedStats} from "../../../../core/models/cached-stats.model";
 
 @Component({
   selector: 'app-production-statistics',
@@ -151,10 +152,4 @@ export class ProductionStatisticsComponent {
   }
 }
 
-interface CachedStats {
-  level: string;
-  concerns: string
-  data: Stats;
-  parent: CachedStats | null;
-  children: Map<string, CachedStats>
-}
+
