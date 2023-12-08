@@ -86,10 +86,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "factorymanagement-front:build:production"
+              "buildTarget": "factorymanagement-front:build:production"
             },
             "development": {
-              "browserTarget": "factorymanagement-front:build:development"
+              "buildTarget": "factorymanagement-front:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -97,7 +97,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "factorymanagement-front:build"
+            "buildTarget": "factorymanagement-front:build"
           }
         },
         "test": {
