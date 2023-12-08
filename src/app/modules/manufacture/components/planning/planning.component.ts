@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {ProductService} from "../../services/product.service";
 import {Product} from "../../../../core/models/product.model";
 import {ProductFamily} from "../../../../core/models/product-family.model";
@@ -7,6 +7,10 @@ import {Client} from "../../../../core/models/client.model";
 import {Batch} from "../../../../core/models/batch.model";
 import {Packet} from "../../../../core/models/packet.model";
 import {AuthService} from "../../../../services/auth.service";
+import {debounceTime, Subject, tap} from "rxjs";
+import {AlertType} from "../../../../core/enums/alertType.enum";
+import {NgbAlert} from "@ng-bootstrap/ng-bootstrap";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
     selector: 'app-planning',
@@ -28,12 +32,25 @@ export class PlanningComponent implements OnInit {
   public rotate= true;
 
   filterForm: FormGroup;
-  loading = false
+  loading = false;
+
+  @ViewChild('selfClosingAlert', { static: false }) selfClosingAlert!: NgbAlert;
+  alertType = 'danger'
+  private _message$ = new Subject<string>();
+  message = ''
 
   constructor(private productService$: ProductService,
               private authService$: AuthService,
               private fb: FormBuilder) {
     this.filterForm = this.generateFilterForm();
+
+    this._message$
+      .pipe(
+        takeUntilDestroyed(),
+        tap((message) => (this.message = message)),
+        debounceTime(5000),
+      )
+      .subscribe(() => this.selfClosingAlert?.close());
   }
 
   ngOnInit(): void {
@@ -58,8 +75,8 @@ export class PlanningComponent implements OnInit {
         this.totalPages = value.totalPages;
         this.loading = false;
       },
-      error: err => {
-        this.loading = false;
+      error: () => {
+        this.showMessage("An unexpected error occurred! Please Reload the page. If the problem persists, contact tech support.", "danger")
       }
     });
 
@@ -108,5 +125,10 @@ export class PlanningComponent implements OnInit {
 
   get connectedUserRole() {
     return this.authService$.connectedUser?.role
+  }
+
+  private showMessage(message: string, type: AlertType) {
+    this.alertType = type;
+    this._message$.next(message);
   }
 }

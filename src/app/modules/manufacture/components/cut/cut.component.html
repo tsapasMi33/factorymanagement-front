@@ -1,7 +1,9 @@
 <h2>Cut</h2>
 <hr>
+@if (message) {
+  <ngb-alert #selfClosingAlert [type]="alertType" (closed)="message = ''">{{ message }}</ngb-alert>
+}
 <div>
-
   <div class="row g-3 align-items-center">
     <div class="col-auto">
       <label for="scan" class="col-form-label">Scan</label>
@@ -37,7 +39,7 @@
           </tr>
           </thead>
           <tbody>
-            <ng-container *ngFor="let component of batch.batchComponents.values()">
+            <ng-container *ngFor="let component of batch.batchComponents">
               <tr>
                 <td>{{component.count}}</td>
                 <td>{{component.component.name}}</td>

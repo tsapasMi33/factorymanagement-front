@@ -1,11 +1,14 @@
 <h2>Start Production</h2>
 <hr>
+@if (message) {
+  <ngb-alert #selfClosingAlert [type]="alertType" (closed)="message = ''">{{ message }}</ngb-alert>
+}
 <div>
   <form [formGroup]="filterForm" (ngSubmit)="onFilter()">
     <table class="table table-hover">
       <thead>
       <tr class="table-dark">
-        <th scope="col" rowspan="2"><button class="btn btn-outline-success" type="button" (click)="onPutBatchInProduction()">Put<br>In<br>Production</button></th>
+        <th scope="col" rowspan="2"><button class="btn btn-outline-success" type="button" (click)="onPutBatchInProduction()" [disabled]="this.createBatchFormArray.length === 0">Put<br>In<br>Production</button></th>
         <th scope="col">
           <select class="form-select-sm" formControlName="clientId">
             <option [value]="null">All</option>

@@ -1,9 +1,12 @@
-import {Component, OnInit, TemplateRef} from '@angular/core';
+import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {PacketService} from "../../services/packet.service";
 import {Packet} from "../../../../core/models/packet.model";
 import {FormArray, FormControl, FormGroup} from "@angular/forms";
 import {ShipmentService} from "../../services/shipment.service";
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {NgbAlert, NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {debounceTime, Subject, tap} from "rxjs";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {AlertType} from "../../../../core/enums/alertType.enum";
 @Component({
   selector: 'app-ship',
   templateUrl: './ship.component.html',
@@ -19,9 +22,24 @@ export class ShipComponent implements OnInit{
 
   modalInput = '';
 
+  shipmentClient = ''
+
+  @ViewChild('selfClosingAlert', { static: false }) selfClosingAlert!: NgbAlert;
+  alertType = 'danger'
+  private _message$ = new Subject<string>();
+  message = ''
+
   constructor(private packetService$: PacketService,
               private shipmentService$: ShipmentService,
-              private modalService: NgbModal) { }
+              private modalService: NgbModal) {
+    this._message$
+      .pipe(
+        takeUntilDestroyed(),
+        tap((message) => (this.message = message)),
+        debounceTime(5000),
+      )
+      .subscribe(() => this.selfClosingAlert?.close());
+  }
 
   ngOnInit(): void {
     this.loadContent();
@@ -34,7 +52,7 @@ export class ShipComponent implements OnInit{
         this.packets = value;
         this.presentClients = [...new Map(value.map(value => [value.clientName, value.clientName])).values()]
       },
-      error: err => console.error(err)
+      error: () => this.showMessage("An unexpected error occurred! Please Reload the page. If the problem persists, contact tech support.", "danger")
     })
     this.selectedClient = '';
     this.selectedClientPackets = [];
@@ -68,8 +86,8 @@ export class ShipComponent implements OnInit{
 
   shipPackets(modal?: any) {
     this.shipmentService$.shipPackets(this.shipmentForm.value).subscribe({
-      next: value => this.ngOnInit(),
-      error: err => console.error(err)
+      next: () => this.ngOnInit(),
+      error: err => this.showMessage(err.error.errors.message, "warning")
     })
     if (modal) {
       modal.close();
@@ -94,9 +112,22 @@ export class ShipComponent implements OnInit{
       if (p.code === this.modalInput &&
         this.shipmentFormArray.controls.findIndex(cp => cp.value.id === p.id) === -1
       ) {
+        if (this.shipmentClient === '') {
+          this.shipmentClient = p.clientName
+        } else {
+          if (this.shipmentClient !== p.clientName) {
+            this.showMessage("All products in a Packet must belong to the same client!", "warning");
+            return;
+          }
+        }
         this.shipmentFormArray.push(new FormControl({id: p.id, code: p.code}))
         return;
       }
     });
+  }
+
+  private showMessage(message: string, type: AlertType) {
+    this.alertType = type;
+    this._message$.next(message);
   }
 }

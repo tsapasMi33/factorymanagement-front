@@ -1,7 +1,11 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {ProductService} from "../../services/product.service";
 import {Product} from "../../../../core/models/product.model";
 import {AuthService} from "../../../../services/auth.service";
+import {NgbAlert} from "@ng-bootstrap/ng-bootstrap";
+import {debounceTime, Subject, tap} from "rxjs";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {AlertType} from "../../../../core/enums/alertType.enum";
 
 @Component({
   selector: 'app-finish',
@@ -22,8 +26,20 @@ export class FinishComponent implements OnInit {
 
   public loading = false;
 
+  @ViewChild('selfClosingAlert', { static: false }) selfClosingAlert!: NgbAlert;
+  alertType = 'danger'
+  private _message$ = new Subject<string>();
+  message = ''
+
   constructor(private productService$: ProductService,
               private authService$: AuthService) {
+    this._message$
+      .pipe(
+        takeUntilDestroyed(),
+        tap((message) => (this.message = message)),
+        debounceTime(5000),
+      )
+      .subscribe(() => this.selfClosingAlert?.close());
   }
 
   ngOnInit(): void {
@@ -41,29 +57,28 @@ export class FinishComponent implements OnInit {
         this.totalPages = value.totalPages;
         this.loading = false
       },
-      error: err => {
-        this.loading = false;
-        console.error(err)
-      }
+      error: () => this.showMessage("An unexpected error occurred! Please Reload the page. If the problem persists, contact tech support.", "danger")
     })
   }
 
   onStartJob(id: number, index: number) {
     this.productService$.doJob("FINISHED", id, 'start').subscribe({
-      next: value => this.products[index] = value
+      next: value => this.products[index] = value,
+      error: err => this.showMessage(err.error.errors.message, "warning")
     });
   }
 
   onPauseJob(id: number, index: number) {
     this.productService$.doJob("FINISHED", id, 'pause').subscribe({
-      next: value => this.products[index] = value
+      next: value => this.products[index] = value,
+      error: err => this.showMessage(err.error.errors.message, "warning")
     });
   }
 
   onFinishJob(id: number, index: number) {
     this.productService$.doJob("FINISHED", id, 'finish').subscribe({
-      next: value => this.products.splice(index, 1),
-      error: err => {console.log(err)}
+      next: () => this.products.splice(index, 1),
+      error: err => this.showMessage(err.error.errors.message, "warning")
     });
   }
 
@@ -86,7 +101,7 @@ export class FinishComponent implements OnInit {
   }
 
   checkInput() {
-    const regex  = /[0-9]{10}[/][0-9]+[.][0-9]{2}/;
+    const regex  = /[0-9]{10}\/[0-9]+[.][0-9]{2}/;
     if (regex.test(this.scanInput)) {
       this.doJob()
       this.scanInput = '';
@@ -104,32 +119,32 @@ export class FinishComponent implements OnInit {
         } else {
           this.onFinishJob(value.id, 0);
         }
-      }
+      },
+      error: err => this.showMessage(err.error.errors.message, "warning")
     })
   }
 
 
   disableButton(product: Product, action: string) {
     if (action === 'start') {
-      if (this.isProductOngoing(product) ||
-        (this.isProductPaused(product) && this.getCurrentUser(product) !== this.authService$.connectedUser?.username)) {
-        return true;
-      }
-      return false;
+      return this.isProductOngoing(product) ||
+        (this.isProductPaused(product) && this.getCurrentUser(product) !== this.authService$.connectedUser?.username);
+
     } else if (action === 'pause') {
-      if (this.isProductPaused(product) ||
+      return this.isProductPaused(product) ||
         !this.isProductOngoing(product) ||
-        (this.isProductOngoing(product) && this.getCurrentUser(product) !== this.authService$.connectedUser?.username)){
-        return true;
-      }
-      return false;
+        (this.isProductOngoing(product) && this.getCurrentUser(product) !== this.authService$.connectedUser?.username);
+
     } else {
-      if (!this.isProductOngoing(product) ||
+      return !this.isProductOngoing(product) ||
         this.isProductPaused(product) ||
-        (this.isProductOngoing(product) && this.getCurrentUser(product) !== this.authService$.connectedUser?.username)) {
-        return true;
-      }
-      return false;
+        (this.isProductOngoing(product) && this.getCurrentUser(product) !== this.authService$.connectedUser?.username);
+
     }
+  }
+
+  private showMessage(message: string, type: AlertType) {
+    this.alertType = type;
+    this._message$.next(message);
   }
 }

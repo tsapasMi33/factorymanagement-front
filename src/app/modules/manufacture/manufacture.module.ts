@@ -16,7 +16,7 @@ import {StepPipe} from "../../core/pipes/step.pipe";
 import {ProductService} from "./services/product.service";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {BatchService} from "./services/batch.service";
-import {NgbPagination} from "@ng-bootstrap/ng-bootstrap";
+import {NgbAlert, NgbPagination} from "@ng-bootstrap/ng-bootstrap";
 
 
 @NgModule({
@@ -39,6 +39,7 @@ import {NgbPagination} from "@ng-bootstrap/ng-bootstrap";
         ReactiveFormsModule,
         NgbPagination,
         FormsModule,
+        NgbAlert,
     ],
     exports: [
         StepPipe

@@ -1,11 +1,14 @@
-import {Component, OnInit, TemplateRef} from '@angular/core';
+import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {Product} from "../../../../core/models/product.model";
 import {ProductFamily} from "../../../../core/models/product-family.model";
 import {FormArray, FormBuilder, FormControl, FormGroup} from "@angular/forms";
 import {ProductService} from "../../services/product.service";
 import {PacketService} from "../../services/packet.service";
 import {Client} from "../../../../core/models/client.model";
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {NgbAlert, NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {debounceTime, Subject, tap} from "rxjs";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {AlertType} from "../../../../core/enums/alertType.enum";
 
 @Component({
   selector: 'app-pack',
@@ -27,14 +30,29 @@ export class PackComponent implements OnInit{
   filterForm!: FormGroup;
   createPacketForm!: FormGroup;
 
+  packetClient = '';
+
   public loading = false;
 
   modalInput = '';
 
+  @ViewChild('selfClosingAlert', { static: false }) selfClosingAlert!: NgbAlert;
+  alertType = 'danger'
+  private _message$ = new Subject<string>();
+  message = ''
+
   constructor(private productService$: ProductService,
               private packetService$: PacketService,
               private fb: FormBuilder,
-              private modalService: NgbModal) { }
+              private modalService: NgbModal) {
+    this._message$
+      .pipe(
+        takeUntilDestroyed(),
+        tap((message) => (this.message = message)),
+        debounceTime(5000),
+      )
+      .subscribe(() => this.selfClosingAlert?.close());
+  }
 
   ngOnInit(): void {
     this.loadFilter();
@@ -58,10 +76,7 @@ export class PackComponent implements OnInit{
         this.totalPages = value.totalPages;
         this.loading = false;
       },
-      error: err => {
-        this.loading = false;
-        console.error(err)
-      }
+      error: () => this.showMessage("An unexpected error occurred! Please Reload the page. If the problem persists, contact tech support.", "danger")
     });
   }
 
@@ -87,11 +102,11 @@ export class PackComponent implements OnInit{
 
   onCreatePacket(modal?: any) {
     this.packetService$.createPacket(this.createPacketForm.value).subscribe({
-      next: value => {
+      next: () => {
         this.loadContent(1);
         this.createPacketForm = this.generatePacketForm();
       },
-      error: err => console.error(err)
+      error: err => this.showMessage(err.error.errors.message, "warning")
     })
     if (modal) {
       modal.close();
@@ -124,12 +139,13 @@ export class PackComponent implements OnInit{
   }
 
   openModal(content: TemplateRef<any>) {
+    this.createPacketForm = this.generatePacketForm();
     this.modalService.open(content);
   }
 
 
   checkInput() {
-    const regex  = /^[0-9]{10}[/][0-9]+[.][0-9]{2}$/;
+    const regex  = /^[0-9]{10}\/[0-9]+[.][0-9]{2}$/;
 
     if (regex.test(this.modalInput)) {
       this.addToPacket();
@@ -143,9 +159,22 @@ export class PackComponent implements OnInit{
       if (p.order.code + '/' + p.code === this.modalInput &&
         this.createPacketFormArray.controls.findIndex(cp => cp.value.id === p.id) === -1
       ) {
+        if (this.packetClient === '') {
+          this.packetClient = p.order.client.name
+        } else {
+          if (this.packetClient !== p.order.client.name) {
+            this.showMessage("All products in a Packet must belong to the same client!", "warning");
+            return;
+          }
+        }
         this.createPacketFormArray.push(new FormControl({id: p.id, code: p.order.code+'/'+p.code}))
         return;
       }
     });
+  }
+
+  private showMessage(message: string, type: AlertType) {
+    this.alertType = type;
+    this._message$.next(message);
   }
 }

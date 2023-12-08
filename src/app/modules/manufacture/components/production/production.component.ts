@@ -1,10 +1,14 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {Product} from "../../../../core/models/product.model";
 import {ProductFamily} from "../../../../core/models/product-family.model";
 import {FormArray, FormBuilder, FormControl, FormGroup} from "@angular/forms";
 import {ProductService} from "../../services/product.service";
 import {BatchService} from "../../services/batch.service";
 import {Client} from "../../../../core/models/client.model";
+import {NgbAlert} from "@ng-bootstrap/ng-bootstrap";
+import {debounceTime, Subject, tap} from "rxjs";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {AlertType} from "../../../../core/enums/alertType.enum";
 
 @Component({
   selector: 'app-production',
@@ -26,12 +30,25 @@ export class ProductionComponent implements OnInit {
   filterForm!: FormGroup;
   createBatchForm!: FormGroup;
 
+  @ViewChild('selfClosingAlert', { static: false }) selfClosingAlert!: NgbAlert;
+  alertType = 'danger'
+  private _message$ = new Subject<string>();
+  message = ''
+
   public loading = false
 
   constructor(private productService$: ProductService,
               private batchService$: BatchService,
               private fb: FormBuilder
-              ) { }
+              ) {
+    this._message$
+      .pipe(
+        takeUntilDestroyed(),
+        tap((message) => (this.message = message)),
+        debounceTime(5000),
+      )
+      .subscribe(() => this.selfClosingAlert?.close());
+  }
 
   ngOnInit(): void {
     this.loadFilter();
@@ -55,10 +72,8 @@ export class ProductionComponent implements OnInit {
         this.totalPages = value.totalPages;
         this.loading = false;
       },
-      error: err => {
-        this.loading = false;
-        console.error(err)
-      }
+      error: () => this.showMessage("An unexpected error occurred! Please Reload the page. If the problem persists, contact tech support.", "danger")
+
     });
   }
 
@@ -88,11 +103,13 @@ export class ProductionComponent implements OnInit {
 
   onPutBatchInProduction() {
     this.batchService$.createBatch(this.createBatchForm.value).subscribe({
-      next: response => {
+      next: () => {
         this.loadContent(this.page);
         this.createBatchForm = this.generateBatchForm()
+        this.showMessage('Batch was put in Production!', "success")
         },
-      error: err => console.error(err)
+      error: err => this.showMessage(err.error.errors.message, "warning")
+
     })
   }
 
@@ -115,5 +132,10 @@ export class ProductionComponent implements OnInit {
     return this.fb.group({
       products: this.fb.array([])
     })
+  }
+
+  private showMessage(message: string, type: AlertType) {
+    this.alertType = type;
+    this._message$.next(message);
   }
 }

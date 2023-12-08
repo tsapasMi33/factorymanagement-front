@@ -1,5 +1,8 @@
 <h2>Planning</h2>
 <hr>
+@if (message) {
+  <ngb-alert #selfClosingAlert [type]="alertType" (closed)="message = ''">{{ message }}</ngb-alert>
+}
 <div class="d-grid gap-2 d-md-flex justify-content-md-end">
   <button class="btn btn-danger me-md-2" type="button" (click)="archiveAll()"  *ngIf="connectedUserRole === 'ADMIN'">Archive All</button>
 </div>
@@ -65,9 +68,11 @@
       <th scope="col">
         <input class="form-control form-control-sm" type="date" formControlName="deliveryDate">
       </th>
-      <th></th>
-      <th scope="col">
-        <button class="btn btn-primary" type="submit">Apply</button>
+      <th colspan="2" scope="col" class="text-end">
+        <div class="btn-group" role="group" aria-label="Basic example">
+          <button type="reset" class="btn btn-secondary">Reset</button>
+          <button class="btn btn-primary" type="submit">Apply</button>
+        </div>
       </th>
     </tr>
     <tr class="table-dark">

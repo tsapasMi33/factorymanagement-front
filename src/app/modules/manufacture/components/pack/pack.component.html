@@ -1,5 +1,8 @@
 <h2>Pack</h2>
 <hr>
+@if (message) {
+  <ngb-alert #selfClosingAlert [type]="alertType" (closed)="message = ''">{{ message }}</ngb-alert>
+}
 <div class="row">
 <div class="col-12 d-flex justify-content-end">
   <form>
@@ -95,6 +98,10 @@
     </div>
     <hr>
     <div>
+      @if (message) {
+        <ngb-alert #selfClosingAlert [type]="alertType" (closed)="message = ''">{{ message }}</ngb-alert>
+      }
+      <h5>{{packetClient}}</h5>
       <ng-container *ngFor="let product of createPacketFormArray.controls; index as i">
         <p style="display: inline-block">
           <span class="badge text-bg-danger">{{product.value.code}}

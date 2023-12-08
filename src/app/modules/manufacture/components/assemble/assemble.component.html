@@ -1,6 +1,8 @@
 <h2>Assemble</h2>
 <hr>
-
+@if (message) {
+  <ngb-alert #selfClosingAlert [type]="alertType" (closed)="message = ''">{{ message }}</ngb-alert>
+}
 <div class="row g-3 align-items-center">
   <div class="col-auto">
     <label for="scan" class="col-form-label">Scan</label>

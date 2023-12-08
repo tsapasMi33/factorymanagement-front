@@ -1,4 +1,4 @@
-import {DeliveryPreference} from "../enums/delivery-preference.model";
+import {DeliveryPreference} from "../enums/delivery-preference.enum";
 import {Client} from "./client.model";
 import {Step} from "../enums/step.enum";
 import {ProductVariant} from "./product-variant.model";

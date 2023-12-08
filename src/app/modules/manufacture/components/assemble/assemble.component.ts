@@ -1,7 +1,11 @@
-import { Component } from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import {Batch} from "../../../../core/models/batch.model";
 import {BatchService} from "../../services/batch.service";
 import {AuthService} from "../../../../services/auth.service";
+import {NgbAlert} from "@ng-bootstrap/ng-bootstrap";
+import {debounceTime, Subject, tap} from "rxjs";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {AlertType} from "../../../../core/enums/alertType.enum";
 
 @Component({
   selector: 'app-assemble',
@@ -22,8 +26,20 @@ export class AssembleComponent {
 
   public loading = false;
 
+  @ViewChild('selfClosingAlert', { static: false }) selfClosingAlert!: NgbAlert;
+  alertType = 'danger'
+  private _message$ = new Subject<string>();
+  message = ''
+
   constructor(private batchService$: BatchService,
               private authService$: AuthService) {
+    this._message$
+      .pipe(
+        takeUntilDestroyed(),
+        tap((message) => (this.message = message)),
+        debounceTime(5000),
+      )
+      .subscribe(() => this.selfClosingAlert?.close());
   }
 
   ngOnInit(): void {
@@ -41,29 +57,28 @@ export class AssembleComponent {
         this.totalPages = value.totalPages;
         this.loading = false;
       },
-      error: err => {
-        this.loading = false;
-        console.error(err)
-      }
+      error: () => this.showMessage("An unexpected error occurred! Please Reload the page. If the problem persists, contact tech support.", "danger")
     })
   }
 
   onStartJob(id: number, index: number) {
     this.batchService$.doJob("ASSEMBLED", id, 'start').subscribe({
-      next: value => this.batches[index] = value
+      next: value => this.batches[index] = value,
+      error: err => this.showMessage(err.error.errors.message, "warning")
     });
   }
 
   onPauseJob(id: number, index: number) {
     this.batchService$.doJob("ASSEMBLED", id, 'pause').subscribe({
-      next: value => this.batches[index] = value
+      next: value => this.batches[index] = value,
+      error: err => this.showMessage(err.error.errors.message, "warning")
     });
   }
 
   onFinishJob(id: number, index: number) {
     this.batchService$.doJob("ASSEMBLED", id, 'finish').subscribe({
-      next: value => this.batches.splice(index, 1),
-      error: err => {console.log(err)}
+      next: () => this.batches.splice(index, 1),
+      error: err => this.showMessage(err.error.errors.message, "warning")
     });
   }
 
@@ -104,31 +119,31 @@ export class AssembleComponent {
         } else {
           this.onFinishJob(value.id, 0);
         }
-      }
+      },
+      error: err => this.showMessage(err.error.errors.message, "warning")
     })
   }
 
   disableButton(batch: Batch, action: string) {
     if (action === 'start') {
-      if (this.isBatchOngoing(batch) ||
-        (this.isBatchPaused(batch) && this.getCurrentUser(batch) !== this.authService$.connectedUser?.username)) {
-        return true;
-      }
-      return false;
+      return this.isBatchOngoing(batch) ||
+        (this.isBatchPaused(batch) && this.getCurrentUser(batch) !== this.authService$.connectedUser?.username);
+
     } else if (action === 'pause') {
-      if (this.isBatchPaused(batch) ||
+      return this.isBatchPaused(batch) ||
         !this.isBatchOngoing(batch) ||
-        (this.isBatchOngoing(batch) && this.getCurrentUser(batch) !== this.authService$.connectedUser?.username)){
-        return true;
-      }
-      return false;
+        (this.isBatchOngoing(batch) && this.getCurrentUser(batch) !== this.authService$.connectedUser?.username);
+
     } else {
-      if (!this.isBatchOngoing(batch) ||
+      return !this.isBatchOngoing(batch) ||
         this.isBatchPaused(batch) ||
-        (this.isBatchOngoing(batch) && this.getCurrentUser(batch) !== this.authService$.connectedUser?.username)) {
-        return true;
-      }
-      return false;
+        (this.isBatchOngoing(batch) && this.getCurrentUser(batch) !== this.authService$.connectedUser?.username);
+
     }
+  }
+
+  private showMessage(message: string, type: AlertType) {
+    this.alertType = type;
+    this._message$.next(message);
   }
 }
