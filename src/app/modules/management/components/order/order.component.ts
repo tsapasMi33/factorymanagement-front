@@ -1,11 +1,14 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {Material} from "../../../../core/enums/material.enum";
 import {AbstractControl, FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {OrderService} from "../../services/order.service";
 import {ClientService} from "../../services/client.service";
 import {Client} from "../../../../core/models/client.model";
 import {ProductVariant} from "../../../../core/models/product-variant.model";
-import {BehaviorSubject} from "rxjs";
+import {debounceTime, Subject, tap} from "rxjs";
+import {NgbAlert} from "@ng-bootstrap/ng-bootstrap";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {AlertType} from "../../../../core/enums/alertType.enum";
 
 @Component({
   selector: 'app-order',
@@ -17,16 +20,27 @@ export class OrderComponent implements OnInit {
   orderForm!: FormGroup
   clients!: Client[];
 
-  successMessage = new BehaviorSubject<string>('')
+  @ViewChild('selfClosingAlert', { static: false }) selfClosingAlert!: NgbAlert;
+  alertType = 'danger'
+  private _message$ = new Subject<string>();
+  message = ''
 
   constructor(private orderService$: OrderService,
               private clientService$: ClientService,
-              private fb: FormBuilder) { }
+              private fb: FormBuilder) {
+    this._message$
+      .pipe(
+        takeUntilDestroyed(),
+        tap((message) => (this.message = message)),
+        debounceTime(5000),
+      )
+      .subscribe(() => this.selfClosingAlert?.close());
+  }
 
   ngOnInit(): void {
     this.clientService$.getClients().subscribe({
       next: value => this.clients = value,
-      error: err => console.error(err)
+      error: () => this.showMessage("An unexpected error occurred! Please Reload the page. If the problem persists, contact tech support.", "danger")
     })
     this.orderForm = this.generateOrderForm();
   }
@@ -53,17 +67,17 @@ export class OrderComponent implements OnInit {
     }
   }
 
-  getFormArrayControl(orderLine: AbstractControl<any>) {
+  getFormArrayControl(orderLine: AbstractControl) {
     return orderLine as FormGroup;
   }
 
   createOrder() {
     this.orderService$.createOrder(this.orderForm.value).subscribe({
       next: () => {
-        this.showSuccess('The order has been encoded successfully!');
+        this.showMessage('The order has been encoded successfully!', "success");
         this.orderForm = this.generateOrderForm();
       },
-      error: err => console.error(err)
+      error: err => this.showMessage(err.error.errors.message, "warning")
     })
   }
 
@@ -78,10 +92,8 @@ export class OrderComponent implements OnInit {
     })
   }
 
-  private showSuccess(message: string) {
-    this.successMessage.next(message);
-    setInterval(() => {
-      this.successMessage.next('')
-    },5000)
+  public showMessage(message: string, type: AlertType) {
+    this.alertType = type;
+    this._message$.next(message);
   }
 }

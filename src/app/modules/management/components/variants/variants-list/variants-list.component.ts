@@ -1,9 +1,12 @@
-import {Component, OnInit, TemplateRef} from '@angular/core';
+import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {ProductVariant} from "../../../../../core/models/product-variant.model";
 import {FormBuilder, FormGroup} from "@angular/forms";
 import {ProductVariantService} from "../../../services/product-variant.service";
 import {ProductFamily} from "../../../../../core/models/product-family.model";
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {NgbAlert, NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {debounceTime, Subject, tap} from "rxjs";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {AlertType} from "../../../../../core/enums/alertType.enum";
 
 @Component({
   selector: 'app-variants-list',
@@ -21,10 +24,22 @@ export class VariantsListComponent implements OnInit{
   filterForm: FormGroup;
   loading = true;
 
+  @ViewChild('selfClosingAlert', { static: false }) selfClosingAlert!: NgbAlert;
+  alertType = 'danger'
+  private _message$ = new Subject<string>();
+  message = ''
+
   constructor(private productVariantService$: ProductVariantService,
               private fb: FormBuilder,
               private modalService: NgbModal) {
     this.filterForm = this.generateFilterForm()
+    this._message$
+      .pipe(
+        takeUntilDestroyed(),
+        tap((message) => (this.message = message)),
+        debounceTime(5000),
+      )
+      .subscribe(() => this.selfClosingAlert?.close());
   }
 
   ngOnInit(): void {
@@ -43,7 +58,7 @@ export class VariantsListComponent implements OnInit{
         this.familiesPresent = Array.from(idMap.values())
         this.loading = false;
       },
-      error: err => console.error(err)
+      error: () => this.showMessage("An unexpected error occurred! Please Reload the page. If the problem persists, contact tech support.", "danger")
     })
   }
 
@@ -90,7 +105,13 @@ export class VariantsListComponent implements OnInit{
       next: () => {
         modal.close()
         this.loadContent()
-      }
+      },
+      error: err => this.showMessage(err.error.errors.message, "warning")
     })
+  }
+
+  public showMessage(message: string, type: AlertType) {
+    this.alertType = type;
+    this._message$.next(message);
   }
 }

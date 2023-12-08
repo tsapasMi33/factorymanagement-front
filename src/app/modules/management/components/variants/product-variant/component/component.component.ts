@@ -1,10 +1,13 @@
-import {Component, EventEmitter, OnInit, Output, TemplateRef} from '@angular/core';
+import {Component, EventEmitter, OnInit, Output, TemplateRef, ViewChild} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {ProductComponent} from "../../../../../../core/models/product-component.model";
 import {MaterialType} from "../../../../../../core/models/material-type.model";
 import {ComponentService} from "../../../../services/component.service";
 import {MaterialTypeService} from "../../../../services/material-type.service";
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {NgbAlert, NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {AlertType} from "../../../../../../core/enums/alertType.enum";
+import {debounceTime, Subject, tap} from "rxjs";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-component',
@@ -22,11 +25,24 @@ export class ComponentComponent implements OnInit {
   createMode = false;
 
   @Output() componentEmitter = new EventEmitter<ProductComponent>;
+  @Output() errorEmitter = new EventEmitter<{message: string, type: AlertType}>
+
+  @ViewChild('selfClosingAlert', { static: false }) selfClosingAlert!: NgbAlert;
+  alertType = 'danger'
+  private _message$ = new Subject<string>();
+  message = ''
 
   constructor(private componentService$: ComponentService,
               private materialTypeService$: MaterialTypeService,
               private fb: FormBuilder,
               private modalService: NgbModal) {
+    this._message$
+    .pipe(
+      takeUntilDestroyed(),
+      tap((message) => (this.message = message)),
+      debounceTime(5000),
+    )
+      .subscribe(() => this.selfClosingAlert?.close());
   }
 
   ngOnInit(): void {
@@ -39,12 +55,13 @@ export class ComponentComponent implements OnInit {
         this.components = value;
         this.filteredComponents = value;
       },
-      error: err => console.error(err)
+      error: () => this.errorEmitter.next({message: "An unexpected error occurred! Please Reload the page. If the problem persists, contact tech support.", type:"danger"})
     });
     this.materialTypeService$.getMaterialTypes().subscribe({
       next: value => {
         this.types = value;
-      }
+      },
+      error: () => this.errorEmitter.next({message: "An unexpected error occurred! Please Reload the page. If the problem persists, contact tech support.", type:"danger"})
     })
   }
 
@@ -93,7 +110,7 @@ export class ComponentComponent implements OnInit {
           modal.close();
           this.load()
         },
-        error: err => console.error(err)
+        error: err => this.showMessage(err.error.errors.message, "warning")
       })
     } else {
       this.componentService$.updateComponent(this.form.value.id, this.form.value).subscribe({
@@ -101,7 +118,7 @@ export class ComponentComponent implements OnInit {
           modal.close();
           this.load()
         },
-        error: err => console.error(err)
+        error: err => this.showMessage(err.error.errors.message, "warning")
       })
     }
   }
@@ -145,6 +162,11 @@ export class ComponentComponent implements OnInit {
     } else {
       this.filteredComponents = this.components.filter(c => c.name.toLowerCase().includes(this.searchField.toLowerCase()))
     }
+  }
+
+  public showMessage(message: string, type: AlertType) {
+    this.alertType = type;
+    this._message$.next(message);
   }
 
 }

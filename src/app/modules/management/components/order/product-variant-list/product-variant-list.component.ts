@@ -4,6 +4,7 @@ import {ProductVariant} from "../../../../../core/models/product-variant.model";
 import {ProductVariantService} from "../../../services/product-variant.service";
 import {ProductFamily} from "../../../../../core/models/product-family.model";
 import {FormBuilder, FormGroup} from "@angular/forms";
+import {AlertType} from "../../../../../core/enums/alertType.enum";
 
 @Component({
   selector: 'app-product-variant-list',
@@ -18,6 +19,7 @@ export class ProductVariantListComponent implements OnInit {
   filterForm!: FormGroup;
   selectedProductVariant!: ProductVariant
   @Output() variantSelectedEmitter = new EventEmitter<ProductVariant>;
+  @Output() errorEmitter = new EventEmitter<{message: string, type: AlertType}>
 
   constructor(private productVariantService$: ProductVariantService,
               private fb: FormBuilder) { }
@@ -34,7 +36,7 @@ export class ProductVariantListComponent implements OnInit {
         this.filteredProductVariants = value
         this.productFamilies = [...new Map(value.map(value => [value.productFamily.id, value.productFamily])).values()]
       },
-      error: err => console.error(err)
+      error: err => this.errorEmitter.next({message:err.error.errors.message, type:"warning"})
     })
   }
 

@@ -1,11 +1,8 @@
 <h2>Users</h2>
 <hr>
-<ng-container *ngIf="(errorMessage | async) !== ''">
-  <div class="alert alert-success alert-dismissible fade show" role="alert">
-    {{errorMessage | async}}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
-</ng-container>
+@if (message) {
+  <ngb-alert #selfClosingAlert [type]="alertType" (closed)="message = ''">{{ message }}</ngb-alert>
+}
 <div class="text-end">
   <button class="btn btn-primary" type="button" (click)="createUser(modal)">Create User</button>
 </div>
@@ -37,6 +34,9 @@
     <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
   </div>
   <div class="modal-body">
+    @if (message) {
+      <ngb-alert #selfClosingAlert [type]="alertType" (closed)="message = ''">{{ message }}</ngb-alert>
+    }
     <form [formGroup]="userForm">
       <div class="mb-3">
         <div class="form-floating mb-3">

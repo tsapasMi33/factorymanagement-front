@@ -1,9 +1,11 @@
-import {Component, TemplateRef} from '@angular/core';
+import {Component, TemplateRef, ViewChild} from '@angular/core';
 import {Client} from "../../../../core/models/client.model";
 import {FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {ClientService} from "../../services/client.service";
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {BehaviorSubject} from "rxjs";
+import {NgbAlert, NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {debounceTime, Subject, tap} from "rxjs";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {AlertType} from "../../../../core/enums/alertType.enum";
 
 @Component({
   selector: 'app-client',
@@ -18,11 +20,21 @@ export class ClientComponent {
   pageLoading = false;
   clientSaving = false;
 
-  errorMessage = new BehaviorSubject<string>('')
+  @ViewChild('selfClosingAlert', { static: false }) selfClosingAlert!: NgbAlert;
+  alertType = 'danger'
+  private _message$ = new Subject<string>();
+  message = ''
 
   constructor(private clientService$: ClientService,
               private modalService: NgbModal,
               private fb: FormBuilder) {
+    this._message$
+      .pipe(
+        takeUntilDestroyed(),
+        tap((message) => (this.message = message)),
+        debounceTime(5000),
+      )
+      .subscribe(() => this.selfClosingAlert?.close());
   }
 
   ngOnInit(): void {
@@ -37,10 +49,7 @@ export class ClientComponent {
         this.clients = value
         this.pageLoading = false;
       },
-      error: err => {
-        console.error(err);
-        this.pageLoading = false;
-      }
+      error: () => this.showMessage("An unexpected error occurred! Please Reload the page. If the problem persists, contact tech support.", "danger")
     })
   }
 
@@ -58,7 +67,7 @@ export class ClientComponent {
         this.setClientForm(value)
         this.open(modal)
       },
-      error: err => console.error(err)
+      error: () => this.showMessage("An unexpected error occurred! Please Reload the page. If the problem persists, contact tech support.", "danger")
     })
   }
 
@@ -69,24 +78,18 @@ export class ClientComponent {
         next: () => {
           this.load();
           this.clientSaving = false;
-          this.showSuccess('Client has been saved!')
+          this.showMessage('Client has been saved!', "success")
         },
-        error: err => {
-          console.error(err);
-          this.clientSaving = false
-        }
+        error: err => this.showMessage(err.error.errors.message, "warning")
       })
     } else {
       this.clientService$.updateClient(this.selectedClientId ,this.clientForm.value).subscribe({
         next: () => {
           this.load();
           this.clientSaving = false;
-          this.showSuccess('Client has been updated!')
+          this.showMessage('Client has been updated!', "success")
         },
-        error: err => {
-          console.error(err);
-          this.clientSaving = false;
-        }
+        error: err => this.showMessage(err.error.errors.message, "warning")
       })
     }
     modal.close()
@@ -97,9 +100,9 @@ export class ClientComponent {
     this.clientService$.deleteClient(this.selectedClientId).subscribe({
       next: () => {
         this.load()
-        this.showSuccess('Client has been deleted!')
+        this.showMessage('Client has been deleted!', "success")
       },
-      error: err => console.error(err)
+      error: err => this.showMessage(err.error.errors.message, "warning")
     })
     modal.close();
   }
@@ -136,10 +139,8 @@ export class ClientComponent {
   }
 
 
-  private showSuccess(message: string) {
-    this.errorMessage.next(message);
-    setInterval(() => {
-      this.errorMessage.next('')
-    },5000)
+  private showMessage(message: string, type: AlertType) {
+    this.alertType = type;
+    this._message$.next(message);
   }
 }

@@ -65,7 +65,6 @@ export class ProductionStatisticsComponent {
     );
   }
 
-
   choosePeriod() {
     let startDate = `${this.fromDate.year}-${this.fromDate.month.toString().padStart(2, '0')}-${this.fromDate.day.toString().padStart(2, '0')}`;
     let endDate;

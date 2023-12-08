@@ -1,14 +1,11 @@
-<ng-container *ngIf="(successMessage | async) !== ''">
-  <div class="alert alert-success alert-dismissible fade show" role="alert">
-    {{successMessage | async}}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
-</ng-container>
+@if (message) {
+  <ngb-alert #selfClosingAlert [type]="alertType" (closed)="message = ''">{{ message }}</ngb-alert>
+}
 <form [formGroup]="productVariantForm">
   <div class="row">
     <div class="col-5">
-      <app-product-family (productFamilyIdEmitter)="setFamily($event)"></app-product-family>
-      <app-component (componentEmitter)="addComponent($event)"></app-component>
+      <app-product-family (productFamilyIdEmitter)="setFamily($event)" (errorEmitter)="showMessage($event.message,$event.type)"></app-product-family>
+      <app-component (componentEmitter)="addComponent($event)" (errorEmitter)="showMessage($event.message,$event.type)"></app-component>
     </div>
     <div class="col-7">
       <h4>New Product Variant</h4>

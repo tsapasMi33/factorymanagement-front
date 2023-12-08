@@ -1,9 +1,12 @@
-import {Component, OnInit, TemplateRef} from '@angular/core';
+import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
 
 import {MaterialTypeService} from "../../services/material-type.service";
 import {MaterialType} from "../../../../core/models/material-type.model";
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {NgbAlert, NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
+import {debounceTime, Subject, tap} from "rxjs";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {AlertType} from "../../../../core/enums/alertType.enum";
 
 @Component({
   selector: 'app-material',
@@ -15,9 +18,21 @@ export class MaterialComponent implements OnInit {
   types!: MaterialType[]
   form!: FormGroup;
 
+  @ViewChild('selfClosingAlert', { static: false }) selfClosingAlert!: NgbAlert;
+  alertType = 'danger'
+  private _message$ = new Subject<string>();
+  message = ''
+
   constructor(private materialTypeService$: MaterialTypeService,
               private fb: FormBuilder,
               private modalService: NgbModal) {
+    this._message$
+      .pipe(
+        takeUntilDestroyed(),
+        tap((message) => (this.message = message)),
+        debounceTime(5000),
+      )
+      .subscribe(() => this.selfClosingAlert?.close());
   }
 
   ngOnInit(): void {
@@ -27,7 +42,8 @@ export class MaterialComponent implements OnInit {
   load() {
     this.form = this.generateForm();
     this.materialTypeService$.getMaterialTypes().subscribe({
-      next: value => this.types = value
+      next: value => this.types = value,
+      error: () => this.showMessage("An unexpected error occurred! Please Reload the page. If the problem persists, contact tech support.", "danger")
     })
   }
 
@@ -66,7 +82,8 @@ export class MaterialComponent implements OnInit {
           this.load();
           modal.close();
           this.form.reset();
-        }
+        },
+        error: err => this.showMessage(err.error.errors.message, "warning")
       })
     } else {
       this.materialTypeService$.update(this.form.value).subscribe({
@@ -74,7 +91,8 @@ export class MaterialComponent implements OnInit {
           this.load();
           modal.close();
           this.form.reset();
-        }
+        },
+        error: err => this.showMessage(err.error.errors.message, "warning")
       })
     }
   }
@@ -85,4 +103,8 @@ export class MaterialComponent implements OnInit {
     this.open(modal);
   }
 
+  private showMessage(message: string, type: AlertType) {
+    this.alertType = type;
+    this._message$.next(message);
+  }
 }

@@ -1,9 +1,11 @@
-import {Component, OnInit, TemplateRef} from '@angular/core';
+import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {User} from "../../../../core/models/user.model";
 import {UserService} from "../../services/user.service";
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
-import {BehaviorSubject} from "rxjs";
+import {NgbAlert, NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {FormBuilder, FormGroup, Validators} from "@angular/forms";
+import {debounceTime, Subject, tap} from "rxjs";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {AlertType} from "../../../../core/enums/alertType.enum";
 
 @Component({
   selector: 'app-user',
@@ -16,11 +18,21 @@ export class UserComponent implements OnInit {
   create = false;
   selectedUserId: number = 0;
 
-  errorMessage = new BehaviorSubject<string>('')
+  @ViewChild('selfClosingAlert', { static: false }) selfClosingAlert!: NgbAlert;
+  alertType = 'danger'
+  private _message$ = new Subject<string>();
+  message = ''
 
   constructor(private userService$: UserService,
               private modalService: NgbModal,
               private fb: FormBuilder) {
+    this._message$
+      .pipe(
+        takeUntilDestroyed(),
+        tap((message) => (this.message = message)),
+        debounceTime(5000),
+      )
+      .subscribe(() => this.selfClosingAlert?.close());
   }
 
   ngOnInit(): void {
@@ -57,16 +69,16 @@ export class UserComponent implements OnInit {
   saveUser(modal: any) {
     if (this.create) {
       this.userService$.createUser(this.userForm.value).subscribe({
-        next: value => this.load(),
-        error: err => console.error(err)
+        next: () => this.load(),
+        error: err => this.showMessage(err.error.errors.message, "warning")
       })
     } else {
       this.userService$.updateUser(this.selectedUserId ,this.userForm.value).subscribe({
-        next: value => {
+        next: () => {
           this.load();
-          this.showSuccess('User has been updated!')
+          this.showMessage('User has been updated!', "success")
         },
-        error: err => console.error(err)
+        error: err => this.showMessage(err.error.errors.message, "warning")
       })
     }
     modal.close()
@@ -95,22 +107,20 @@ export class UserComponent implements OnInit {
   toggleUser(id: number, enabled: boolean) {
     if (enabled) {
       this.userService$.toggleUser(id, !enabled).subscribe({
-        next: value => this.load(),
-        error: err => console.error(err)
+        next: () => this.load(),
+        error: err => this.showMessage(err.error.errors.message, "warning")
       })
     } else {
       this.userService$.toggleUser(id, !enabled).subscribe({
-        next: value => this.load(),
-        error: err => console.error(err)
+        next: () => this.load(),
+        error: err => this.showMessage(err.error.errors.message, "warning")
       })
     }
   }
 
-  private showSuccess(message: string) {
-    this.errorMessage.next(message);
-    setInterval(() => {
-      this.errorMessage.next('')
-    },5000)
+  private showMessage(message: string, type: AlertType) {
+    this.alertType = type;
+    this._message$.next(message);
   }
 
 }

@@ -49,6 +49,9 @@
     <h4 class="modal-title" id="modal-basic-title">Create Component</h4>
     <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
   </div>
+  @if (message) {
+    <ngb-alert #selfClosingAlert [type]="alertType" (closed)="message = ''">{{ message }}</ngb-alert>
+  }
     <div class="alert alert-warning" role="alert" *ngIf="!createMode">
       Caution! Modifications will affect ALL existing products!
     </div>

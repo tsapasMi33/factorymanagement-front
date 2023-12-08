@@ -1,3 +1,6 @@
+@if (message) {
+  <ngb-alert #selfClosingAlert [type]="alertType" (closed)="message = ''">{{ message }}</ngb-alert>
+}
 <div>
   <form [formGroup]="filterForm" (ngSubmit)="onFilter()">
     <table class="table table-hover">
@@ -79,6 +82,9 @@
   </div>
   <form [formGroup]="updatePriceForm" (ngSubmit)="update(modal)">
     <div class="modal-body">
+      @if (message) {
+        <ngb-alert #selfClosingAlert [type]="alertType" (closed)="message = ''">{{ message }}</ngb-alert>
+      }
       <div class="input-group mb-3">
         <span class="input-group-text">Variant</span>
         <input type="text" class="form-control" [value]="selectedVariant.code" disabled>

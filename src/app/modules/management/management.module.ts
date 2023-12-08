@@ -13,7 +13,7 @@ import {ManufactureModule} from "../manufacture/manufacture.module";
 import {ComponentService} from "./services/component.service";
 import { ProductVariantListComponent } from './components/order/product-variant-list/product-variant-list.component';
 import {OrderService} from "./services/order.service";
-import {NgbPagination, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {NgbAlert, NgbPagination, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import { MaterialComponent } from './components/material/material.component';
 import { VariantsComponent } from './components/variants/variants.component';
 import { VariantsListComponent } from './components/variants/variants-list/variants-list.component';
@@ -35,15 +35,16 @@ import {ComponentComponent} from "./components/variants/product-variant/componen
     VariantsComponent,
     VariantsListComponent,
   ],
-  imports: [
-    CommonModule,
-    ManagementRoutingModule,
-    ReactiveFormsModule,
-    ManufactureModule,
-    NgbTooltip,
-    FormsModule,
-    NgbPagination
-  ],
+    imports: [
+        CommonModule,
+        ManagementRoutingModule,
+        ReactiveFormsModule,
+        ManufactureModule,
+        NgbTooltip,
+        FormsModule,
+        NgbPagination,
+        NgbAlert
+    ],
   providers: [
     ClientService,
     UserService,

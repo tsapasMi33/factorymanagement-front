@@ -1,5 +1,8 @@
 <h4>Materials</h4>
 <hr>
+@if (message) {
+  <ngb-alert #selfClosingAlert [type]="alertType" (closed)="message = ''">{{ message }}</ngb-alert>
+}
 <div class="d-grid gap-2 d-md-flex justify-content-md-end">
   <button class="btn btn-outline-success me-md-2" type="button" (click)="open(modal)">Create</button>
 </div>

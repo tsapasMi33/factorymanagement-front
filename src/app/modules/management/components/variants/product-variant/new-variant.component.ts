@@ -1,10 +1,13 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
-import {BehaviorSubject} from "rxjs";
 import {ProductVariantService} from "../../../services/product-variant.service";
 import {ProductComponent} from "../../../../../core/models/product-component.model";
 import {ProductFamily} from "../../../../../core/models/product-family.model";
 import {Material} from "../../../../../core/enums/material.enum";
+import {AlertType} from "../../../../../core/enums/alertType.enum";
+import {NgbAlert} from "@ng-bootstrap/ng-bootstrap";
+import {debounceTime, Subject, tap} from "rxjs";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-new-variant',
@@ -16,10 +19,22 @@ export class NewVariantComponent implements OnInit {
 
   totalCost = 0;
 
-  successMessage = new BehaviorSubject<string>('')
+  @ViewChild('selfClosingAlert', { static: false }) selfClosingAlert!: NgbAlert;
+  alertType = 'danger'
+  private _message$ = new Subject<string>();
+  message = ''
+
 
   constructor(private productVariantService$: ProductVariantService,
-              private fb: FormBuilder) { }
+              private fb: FormBuilder) {
+    this._message$
+      .pipe(
+        takeUntilDestroyed(),
+        tap((message) => (this.message = message)),
+        debounceTime(5000),
+      )
+      .subscribe(() => this.selfClosingAlert?.close());
+  }
 
   ngOnInit(): void {
     this.productVariantForm = this.generateForm();
@@ -81,19 +96,13 @@ export class NewVariantComponent implements OnInit {
     this.productVariantService$.createProductVariant(vForm).subscribe({
       next: () => {
         this.productVariantForm = this.generateForm();
-        this.showSuccess('The new product Variant has been successfully encoded')
-      }
+        this.showMessage('The new product Variant has been successfully encoded', "success")
+      },
+      error: err => this.showMessage(err.error.errors.message, "warning")
     })
   }
 
-  private showSuccess(message: string) {
-    this.successMessage.next(message);
-    setInterval(() => {
-      this.successMessage.next('')
-    },5000)
-  }
-
-  getFormArrayControl(componentLine: AbstractControl<any>) {
+  getFormArrayControl(componentLine: AbstractControl) {
     return componentLine as FormGroup;
   }
 
@@ -104,6 +113,12 @@ export class NewVariantComponent implements OnInit {
     let sum = 0;
     x.forEach(c => sum = sum + c)
     this.totalCost = sum;
+  }
+
+
+  public showMessage(message: string, type: AlertType) {
+    this.alertType = type;
+    this._message$.next(message);
   }
 
 }

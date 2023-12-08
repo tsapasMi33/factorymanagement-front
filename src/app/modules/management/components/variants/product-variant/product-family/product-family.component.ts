@@ -1,9 +1,12 @@
-import {Component, EventEmitter, OnInit, Output, TemplateRef} from '@angular/core';
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {Component, EventEmitter, OnInit, Output, TemplateRef, ViewChild} from '@angular/core';
+import {NgbAlert, NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {FormArray, FormControl, FormGroup} from "@angular/forms";
 import {ProductFamily} from "../../../../../../core/models/product-family.model";
 import {ProductFamilyService} from "../../../../services/product-family.service";
 import {Step} from "../../../../../../core/enums/step.enum";
+import {AlertType} from "../../../../../../core/enums/alertType.enum";
+import {debounceTime, Subject, tap} from "rxjs";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 
 @Component({
@@ -16,9 +19,21 @@ export class ProductFamilyComponent implements OnInit {
   selectedProductFamily!: ProductFamily;
   productFamilyForm!: FormGroup;
   @Output() productFamilyIdEmitter = new EventEmitter<ProductFamily>
+  @Output() errorEmitter = new EventEmitter<{message: string, type: AlertType}>
+
+  @ViewChild('selfClosingAlert', { static: false }) selfClosingAlert!: NgbAlert;
+  alertType = 'danger'
+  private _message$ = new Subject<string>();
+  message = ''
 
   constructor(private productFamilyService$: ProductFamilyService, private modalService: NgbModal) {
-
+    this._message$
+      .pipe(
+        takeUntilDestroyed(),
+        tap((message) => (this.message = message)),
+        debounceTime(5000),
+      )
+      .subscribe(() => this.selfClosingAlert?.close());
   }
 
   ngOnInit(): void {
@@ -30,7 +45,7 @@ export class ProductFamilyComponent implements OnInit {
       next: value => {
         this.productFamilies = value
       },
-      error: err => console.error(err)
+      error: () => this.errorEmitter.next({message: "An unexpected error occurred! Please Reload the page. If the problem persists, contact tech support.", type:"danger"})
     })
   }
 
@@ -52,11 +67,11 @@ export class ProductFamilyComponent implements OnInit {
 
   saveProductFamily(modal: any) {
     this.productFamilyService$.saveProductFamily(this.productFamilyForm.value).subscribe({
-      next: value => {
+      next: () => {
         this.load()
         modal.close()
       },
-      error: err => console.error(err)
+      error: err => this.showMessage(err.error.errors.message, "warning")
     })
 
     modal.close()
@@ -73,4 +88,8 @@ export class ProductFamilyComponent implements OnInit {
     })
   }
 
+  public showMessage(message: string, type: AlertType) {
+    this.alertType = type;
+    this._message$.next(message);
+  }
 }

@@ -19,7 +19,7 @@
   </div>
 </div>
 <div class="row row-cols-1 row-cols-md-3 g-4">
-  <ng-container *ngIf="selectedClient !== ''; else message">
+  <ng-container *ngIf="selectedClient !== ''; else messageInfo">
     <ng-container *ngFor="let packet of selectedClientPackets">
       <div class="col">
         <div class="card h-100">
@@ -37,7 +37,7 @@
       </div>
     </ng-container>
   </ng-container>
-<ng-template #message>
+<ng-template #messageInfo>
   <h4>Please choose a client to see available packets...</h4>
 </ng-template>
 </div>

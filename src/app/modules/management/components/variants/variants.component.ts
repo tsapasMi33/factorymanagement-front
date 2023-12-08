@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 
 @Component({
   selector: 'app-variants',
@@ -6,5 +6,11 @@ import { Component } from '@angular/core';
   styleUrls: ['./variants.component.css']
 })
 export class VariantsComponent {
+
+  constructor() {
+
+  }
+
+
 
 }

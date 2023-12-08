@@ -1,14 +1,11 @@
 <h2>Order</h2>
 <hr>
-<ng-container *ngIf="(successMessage | async) !== ''">
-  <div class="alert alert-success alert-dismissible fade show" role="alert">
-    {{successMessage | async}}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
-</ng-container>
+@if (message) {
+  <ngb-alert #selfClosingAlert [type]="alertType" (closed)="message = ''">{{ message }}</ngb-alert>
+}
 <div class="row">
   <div class="col-7">
-    <app-product-variant-list (variantSelectedEmitter)="addProduct($event)"></app-product-variant-list>
+    <app-product-variant-list (variantSelectedEmitter)="addProduct($event)" (errorEmitter)="showMessage($event.message, $event.type)"></app-product-variant-list>
   </div>
   <div class="col-5">
     <h4>New Order</h4>
@@ -34,7 +31,6 @@
     <div class="input-group mb-3">
       <span class="input-group-text" id="basic-addon1">Planned Delivery Date</span>
       <input type="date" class="form-control" formControlName="plannedDeliveryDate">
-      <button class="btn btn-outline-success" type="submit" [disabled]="orderForm.invalid">Create Order</button>
     </div>
     <h6>Products</h6>
     <hr>
@@ -54,6 +50,9 @@
           </form>
         </ng-container>
       </ng-container>
+      <div class="col-12 text-end">
+        <button class="btn btn-outline-success" type="submit" [disabled]="orderForm.invalid">Create Order</button>
+      </div>
     </form>
   </div>
 </div>
