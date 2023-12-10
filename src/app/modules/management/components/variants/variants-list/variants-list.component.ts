@@ -1,11 +1,10 @@
-import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {ProductVariant} from "../../../../../core/models/product-variant.model";
 import {FormBuilder, FormGroup} from "@angular/forms";
 import {ProductVariantService} from "../../../services/product-variant.service";
 import {ProductFamily} from "../../../../../core/models/product-family.model";
 import {NgbAlert, NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {debounceTime, Subject, tap} from "rxjs";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {debounceTime, Subject, takeUntil, tap} from "rxjs";
 import {AlertType} from "../../../../../core/enums/alertType.enum";
 
 @Component({
@@ -13,7 +12,7 @@ import {AlertType} from "../../../../../core/enums/alertType.enum";
   templateUrl: './variants-list.component.html',
   styleUrls: ['./variants-list.component.css']
 })
-export class VariantsListComponent implements OnInit{
+export class VariantsListComponent implements OnInit, OnDestroy {
   filteredVariants: ProductVariant[] = new Array(25)
   variants!: ProductVariant[]
   familiesPresent!: ProductFamily[];
@@ -29,25 +28,33 @@ export class VariantsListComponent implements OnInit{
   private _message$ = new Subject<string>();
   message = ''
 
+  private notifier = new Subject<boolean>();
+
   constructor(private productVariantService$: ProductVariantService,
               private fb: FormBuilder,
               private modalService: NgbModal) {
     this.filterForm = this.generateFilterForm()
     this._message$
       .pipe(
-        takeUntilDestroyed(),
+        takeUntil(this.notifier),
         tap((message) => (this.message = message)),
         debounceTime(5000),
       )
       .subscribe(() => this.selfClosingAlert?.close());
   }
 
+  ngOnDestroy(): void {
+    this.notifier.next(true)
+    this.notifier.complete()
+  }
   ngOnInit(): void {
     this.loadContent()
   }
 
   loadContent() {
-    this.productVariantService$.getProductVariants().subscribe({
+    this.productVariantService$.getProductVariants()
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         this.loading = true
         this.variants = value;
@@ -101,7 +108,9 @@ export class VariantsListComponent implements OnInit{
 
   update(modal: any) {
     this.selectedVariant.price = this.updatePriceForm.get('price')?.value;
-    this.productVariantService$.updateVariant(this.selectedVariant).subscribe({
+    this.productVariantService$.updateVariant(this.selectedVariant)
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: () => {
         modal.close()
         this.loadContent()

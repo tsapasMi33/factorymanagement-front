@@ -1,16 +1,17 @@
-import {Component, ViewChild} from '@angular/core';
+import {Component, OnDestroy, ViewChild} from '@angular/core';
 
 import {StatisticsService} from "../../services/statistics.service";
 import {BarChartComponent} from "../bar-chart/bar-chart.component";
 import {Stats} from "../../../../core/models/stats.model";
 import {NgbCalendar, NgbDate, NgbDateStruct} from "@ng-bootstrap/ng-bootstrap";
+import {Subject, takeUntil} from "rxjs";
 
 @Component({
   selector: 'app-production-statistics',
   templateUrl: './production-statistics.component.html',
   styleUrls: ['./production-statistics.component.css']
 })
-export class ProductionStatisticsComponent {
+export class ProductionStatisticsComponent implements OnDestroy {
   @ViewChild('chart') chart!: BarChartComponent
 
   ready = false;
@@ -26,6 +27,8 @@ export class ProductionStatisticsComponent {
   private _cache!: CachedStats;
 
 
+  private notifier = new Subject<boolean>();
+
   constructor(private statsService$: StatisticsService,
               private calendar: NgbCalendar) {
     let now = new Date();
@@ -33,6 +36,11 @@ export class ProductionStatisticsComponent {
     this.minDate = {year: 2023, month: 1, day: 1}
 
     this.choosePeriod();
+  }
+
+  ngOnDestroy(): void {
+    this.notifier.next(true);
+    this.notifier.complete();
   }
 
   onDateSelection(date: NgbDate) {
@@ -74,7 +82,9 @@ export class ProductionStatisticsComponent {
       endDate = startDate;
     }
 
-    this.statsService$.getProductionStatistics(startDate, endDate).subscribe({
+    this.statsService$.getProductionStatistics(startDate, endDate)
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         this._cache = {data: value, parent: null, children: new Map(), level: 'top', concerns: 'all'}
         this.chart.updateProduction(this._cache.data.stats, this._cache.data.labels, this._cache.level)
@@ -90,7 +100,9 @@ export class ProductionStatisticsComponent {
         this._cache = this._cache.children.get($event)!;
         this.chart.updateProduction(this._cache.data.stats, this._cache.data.labels, this._cache.level)
       } else {
-        this.statsService$.getStatisticsForStep($event, this._cache.data.startDate, this._cache.data.endDate).subscribe({
+        this.statsService$.getStatisticsForStep($event, this._cache.data.startDate, this._cache.data.endDate)
+          .pipe(takeUntil(this.notifier))
+          .subscribe({
           next: value => {
             const cache: CachedStats = {
               data: value,
@@ -110,7 +122,9 @@ export class ProductionStatisticsComponent {
         this._cache = this._cache.children.get($event)!;
         this.chart.updateProduction(this._cache.data.stats, this._cache.data.labels, this._cache.level)
       } else {
-        this.statsService$.getStatisticsForUser($event, this._cache.concerns, this._cache.data.startDate, this._cache.data.endDate).subscribe({
+        this.statsService$.getStatisticsForUser($event, this._cache.concerns, this._cache.data.startDate, this._cache.data.endDate)
+          .pipe(takeUntil(this.notifier))
+          .subscribe({
           next: value => {
             const cache: CachedStats = {
               data: value,

@@ -1,21 +1,29 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {StatisticsService} from "../../services/statistics.service";
 import {BarChartComponent} from "../bar-chart/bar-chart.component";
 import {Benefit} from "../../../../core/models/Benefit.model";
+import {Subject, takeUntil} from "rxjs";
 
 @Component({
   selector: 'app-benefit',
   templateUrl: './benefit.component.html',
   styleUrls: ['./benefit.component.css']
 })
-export class BenefitComponent implements OnInit {
+export class BenefitComponent implements OnInit, OnDestroy {
   @ViewChild('chart') chart!: BarChartComponent
 
   ready = false;
 
   private _cache!: CachedStats;
 
+  private notifier = new Subject<boolean>();
+
   constructor(private statsService$ : StatisticsService) {
+  }
+
+  ngOnDestroy(): void {
+    this.notifier.next(true);
+    this.notifier.complete();
   }
 
   ngOnInit(): void {
@@ -23,7 +31,9 @@ export class BenefitComponent implements OnInit {
   }
 
   getOverallBenefitStats() {
-    this.statsService$.getBenefitStats().subscribe({
+    this.statsService$.getBenefitStats()
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         this._cache = {data: value, parent: null, children: new Map(), level: 'top', concerns: 'all'}
         this.chart.updateBenefit(value, 'top')
@@ -38,7 +48,9 @@ export class BenefitComponent implements OnInit {
         this._cache = this._cache.children.get($event)!;
         this.chart.updateBenefit(this._cache.data, this._cache.level)
       } else {
-        this.statsService$.getBenefitStatsFor($event).subscribe({
+        this.statsService$.getBenefitStatsFor($event)
+          .pipe(takeUntil(this.notifier))
+          .subscribe({
           next: value => {
             const cache: CachedStats = {
               data: value,
@@ -67,6 +79,7 @@ export class BenefitComponent implements OnInit {
       this.chart.updateBenefit(this._cache.data, this._cache.level)
     }
   }
+
 }
 interface CachedStats {
   level: string;

@@ -1,17 +1,18 @@
-import {Component, EventEmitter, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
 import {Material} from "../../../../../core/enums/material.enum";
 import {ProductVariant} from "../../../../../core/models/product-variant.model";
 import {ProductVariantService} from "../../../services/product-variant.service";
 import {ProductFamily} from "../../../../../core/models/product-family.model";
 import {FormBuilder, FormGroup} from "@angular/forms";
 import {AlertType} from "../../../../../core/enums/alertType.enum";
+import {Subject, takeUntil} from "rxjs";
 
 @Component({
   selector: 'app-product-variant-list',
   templateUrl: './product-variant-list.component.html',
   styleUrls: ['./product-variant-list.component.css']
 })
-export class ProductVariantListComponent implements OnInit {
+export class ProductVariantListComponent implements OnInit, OnDestroy {
   protected readonly Material = Material;
   productVariants!: ProductVariant[];
   filteredProductVariants!: ProductVariant[];
@@ -21,8 +22,15 @@ export class ProductVariantListComponent implements OnInit {
   @Output() variantSelectedEmitter = new EventEmitter<ProductVariant>;
   @Output() errorEmitter = new EventEmitter<{message: string, type: AlertType}>
 
+  private notifier = new Subject<boolean>();
+
   constructor(private productVariantService$: ProductVariantService,
               private fb: FormBuilder) { }
+
+  ngOnDestroy(): void {
+    this.notifier.next(true)
+    this.notifier.complete()
+  }
 
   ngOnInit(): void {
     this.filterForm = this.generateFilterForm();
@@ -30,7 +38,9 @@ export class ProductVariantListComponent implements OnInit {
   }
 
   load() {
-    this.productVariantService$.getProductVariants().subscribe({
+    this.productVariantService$.getProductVariants()
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         this.productVariants = value
         this.filteredProductVariants = value

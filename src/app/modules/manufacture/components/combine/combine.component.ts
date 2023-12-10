@@ -1,11 +1,10 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Batch} from "../../../../core/models/batch.model";
 import {BatchService} from "../../services/batch.service";
 import {ProductComponent} from "../../../../core/models/product-component.model";
 import {AuthService} from "../../../../services/auth.service";
 import {NgbAlert} from "@ng-bootstrap/ng-bootstrap";
-import {debounceTime, Subject, tap} from "rxjs";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {debounceTime, Subject, takeUntil, tap} from "rxjs";
 import {AlertType} from "../../../../core/enums/alertType.enum";
 
 @Component({
@@ -13,7 +12,7 @@ import {AlertType} from "../../../../core/enums/alertType.enum";
   templateUrl: './combine.component.html',
   styleUrls: ['./combine.component.css']
 })
-export class CombineComponent implements OnInit {
+export class CombineComponent implements OnInit, OnDestroy {
   public batches: Batch[] = new Array(5);
 
   public  collectionSize!: number;
@@ -30,18 +29,25 @@ export class CombineComponent implements OnInit {
   @ViewChild('selfClosingAlert', { static: false }) selfClosingAlert!: NgbAlert;
   alertType = 'danger'
   private _message$ = new Subject<string>();
-  message = ''
+  message = '';
+
+  private notifier = new Subject<boolean>();
 
   constructor(private batchService$: BatchService,
               private authService$: AuthService) {
     this._message$
       .pipe(
-        takeUntilDestroyed(),
+        takeUntil(this.notifier),
         tap((message) => (this.message = message)),
         debounceTime(5000),
       )
       .subscribe(() => this.selfClosingAlert?.close());
   }
+
+  ngOnDestroy(): void {
+    this.notifier.next(true)
+    this.notifier.complete()
+    }
 
   ngOnInit(): void {
     this.loadContent(1)
@@ -49,7 +55,9 @@ export class CombineComponent implements OnInit {
 
   loadContent(page: number) {
     this.loading = true
-    this.batchService$.getBatchesFor(page, "COMBINED").subscribe({
+    this.batchService$.getBatchesFor(page, "COMBINED")
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         value.content.forEach(b => b.batchComponents = this.mapBatchComponents(b))
         this.batches = value.content
@@ -65,7 +73,9 @@ export class CombineComponent implements OnInit {
   }
 
   onStartJob(id: number, index: number) {
-    this.batchService$.doJob("COMBINED", id, 'start').subscribe({
+    this.batchService$.doJob("COMBINED", id, 'start')
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         value.batchComponents = this.mapBatchComponents(value);
         this.batches[index] = value;
@@ -75,7 +85,9 @@ export class CombineComponent implements OnInit {
   }
 
   onPauseJob(id: number, index: number) {
-    this.batchService$.doJob("COMBINED", id, 'pause').subscribe({
+    this.batchService$.doJob("COMBINED", id, 'pause')
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         value.batchComponents = this.mapBatchComponents(value);
         this.batches[index] = value
@@ -85,7 +97,9 @@ export class CombineComponent implements OnInit {
   }
 
   onFinishJob(id: number, index: number) {
-    this.batchService$.doJob("COMBINED", id, 'finish').subscribe({
+    this.batchService$.doJob("COMBINED", id, 'finish')
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: () => this.batches.splice(index, 1),
       error: err => this.showMessage(err.error.errors.message, "warning")
     });
@@ -119,7 +133,9 @@ export class CombineComponent implements OnInit {
   }
 
   doJob() {
-    this.batchService$.getBatchByCode(this.scanInput).subscribe({
+    this.batchService$.getBatchByCode(this.scanInput)
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         if (!this.isBatchOngoing(value)) {
           this.batches.filter(b => b.id !== value.id);

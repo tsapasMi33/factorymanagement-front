@@ -1,11 +1,10 @@
-import {Component, ViewChild} from '@angular/core';
+import {Component, OnDestroy, ViewChild} from '@angular/core';
 import {Batch} from "../../../../core/models/batch.model";
 import {BatchService} from "../../services/batch.service";
 import {ProductComponent} from "../../../../core/models/product-component.model";
 import {AuthService} from "../../../../services/auth.service";
 import {NgbAlert} from "@ng-bootstrap/ng-bootstrap";
-import {debounceTime, Subject, tap} from "rxjs";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {debounceTime, Subject, takeUntil, tap} from "rxjs";
 import {AlertType} from "../../../../core/enums/alertType.enum";
 
 @Component({
@@ -13,7 +12,7 @@ import {AlertType} from "../../../../core/enums/alertType.enum";
   templateUrl: './bend.component.html',
   styleUrls: ['./bend.component.css']
 })
-export class BendComponent {
+export class BendComponent implements OnDestroy {
   public batches: Batch[] = new Array(5);
 
   public  collectionSize!: number;
@@ -30,18 +29,25 @@ export class BendComponent {
   @ViewChild('selfClosingAlert', { static: false }) selfClosingAlert!: NgbAlert;
   alertType = 'danger'
   private _message$ = new Subject<string>();
-  message = ''
+  message = '';
+
+  private notifier = new Subject<boolean>()
 
   constructor(private batchService$: BatchService,
               private authService$: AuthService) {
     this._message$
       .pipe(
-        takeUntilDestroyed(),
+        takeUntil(this.notifier),
         tap((message) => (this.message = message)),
         debounceTime(5000),
       )
       .subscribe(() => this.selfClosingAlert?.close());
   }
+
+  ngOnDestroy(): void {
+    this.notifier.next(true)
+    this.notifier.complete()
+    }
 
   ngOnInit(): void {
     this.loadContent(1)
@@ -49,7 +55,9 @@ export class BendComponent {
 
   loadContent(page: number) {
     this.loading = true
-    this.batchService$.getBatchesFor(page, "BENT").subscribe({
+    this.batchService$.getBatchesFor(page, "BENT")
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         value.content.forEach(b => b.batchComponents = this.mapBatchComponents(b))
         this.batches = value.content
@@ -64,7 +72,9 @@ export class BendComponent {
   }
 
   onStartJob(id: number, index: number) {
-    this.batchService$.doJob("BENT", id, 'start').subscribe({
+    this.batchService$.doJob("BENT", id, 'start')
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         value.batchComponents = this.mapBatchComponents(value);
         this.batches[index] = value;
@@ -74,7 +84,9 @@ export class BendComponent {
   }
 
   onPauseJob(id: number, index: number) {
-    this.batchService$.doJob("BENT", id, 'pause').subscribe({
+    this.batchService$.doJob("BENT", id, 'pause')
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         value.batchComponents = this.mapBatchComponents(value);
         this.batches[index] = value;
@@ -84,7 +96,9 @@ export class BendComponent {
   }
 
   onFinishJob(batchId: number, index: number) {
-    this.batchService$.doJob("BENT", batchId, 'finish').subscribe({
+    this.batchService$.doJob("BENT", batchId, 'finish')
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: () => this.batches.splice(index, 1),
       error: err => this.showMessage(err.error.errors.message, "warning")
     });
@@ -118,7 +132,9 @@ export class BendComponent {
   }
 
   doJob() {
-    this.batchService$.getBatchByCode(this.scanInput).subscribe({
+    this.batchService$.getBatchByCode(this.scanInput)
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         if (!this.isBatchOngoing(value)) {
           this.batches.filter(b => b.id !== value.id);

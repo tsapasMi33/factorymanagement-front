@@ -1,4 +1,4 @@
-import {Component, EventEmitter, OnInit, Output, TemplateRef, ViewChild} from '@angular/core';
+import {Component, EventEmitter, OnDestroy, OnInit, Output, TemplateRef, ViewChild} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {ProductComponent} from "../../../../../../core/models/product-component.model";
 import {MaterialType} from "../../../../../../core/models/material-type.model";
@@ -6,15 +6,14 @@ import {ComponentService} from "../../../../services/component.service";
 import {MaterialTypeService} from "../../../../services/material-type.service";
 import {NgbAlert, NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {AlertType} from "../../../../../../core/enums/alertType.enum";
-import {debounceTime, Subject, tap} from "rxjs";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {debounceTime, Subject, takeUntil, tap} from "rxjs";
 
 @Component({
   selector: 'app-component',
   templateUrl: './component.component.html',
   styleUrls: ['./component.component.css']
 })
-export class ComponentComponent implements OnInit {
+export class ComponentComponent implements OnInit, OnDestroy {
   components!: ProductComponent[];
   types!: MaterialType[];
   filteredComponents!: ProductComponent[];
@@ -27,6 +26,8 @@ export class ComponentComponent implements OnInit {
   @Output() componentEmitter = new EventEmitter<ProductComponent>;
   @Output() errorEmitter = new EventEmitter<{message: string, type: AlertType}>
 
+  private notifier = new Subject<boolean>();
+
   @ViewChild('selfClosingAlert', { static: false }) selfClosingAlert!: NgbAlert;
   alertType = 'danger'
   private _message$ = new Subject<string>();
@@ -38,11 +39,16 @@ export class ComponentComponent implements OnInit {
               private modalService: NgbModal) {
     this._message$
     .pipe(
-      takeUntilDestroyed(),
+      takeUntil(this.notifier),
       tap((message) => (this.message = message)),
       debounceTime(5000),
     )
       .subscribe(() => this.selfClosingAlert?.close());
+  }
+
+  ngOnDestroy(): void {
+    this.notifier.next(true)
+    this.notifier.complete()
   }
 
   ngOnInit(): void {
@@ -50,14 +56,18 @@ export class ComponentComponent implements OnInit {
   }
 
   load() {
-    this.componentService$.getComponents().subscribe({
+    this.componentService$.getComponents()
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         this.components = value;
         this.filteredComponents = value;
       },
       error: () => this.errorEmitter.next({message: "An unexpected error occurred! Please Reload the page. If the problem persists, contact tech support.", type:"danger"})
     });
-    this.materialTypeService$.getMaterialTypes().subscribe({
+    this.materialTypeService$.getMaterialTypes()
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         this.types = value;
       },
@@ -105,7 +115,9 @@ export class ComponentComponent implements OnInit {
 
   save(modal: any) {
     if (this.createMode) {
-      this.componentService$.createComponent(this.form.value).subscribe({
+      this.componentService$.createComponent(this.form.value)
+        .pipe(takeUntil(this.notifier))
+        .subscribe({
         next: () => {
           modal.close();
           this.load()
@@ -113,7 +125,9 @@ export class ComponentComponent implements OnInit {
         error: err => this.showMessage(err.error.errors.message, "warning")
       })
     } else {
-      this.componentService$.updateComponent(this.form.value.id, this.form.value).subscribe({
+      this.componentService$.updateComponent(this.form.value.id, this.form.value)
+        .pipe(takeUntil(this.notifier))
+        .subscribe({
         next: () => {
           modal.close();
           this.load()

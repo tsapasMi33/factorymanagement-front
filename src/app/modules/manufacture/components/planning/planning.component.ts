@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ProductService} from "../../services/product.service";
 import {Product} from "../../../../core/models/product.model";
 import {ProductFamily} from "../../../../core/models/product-family.model";
@@ -7,17 +7,16 @@ import {Client} from "../../../../core/models/client.model";
 import {Batch} from "../../../../core/models/batch.model";
 import {Packet} from "../../../../core/models/packet.model";
 import {AuthService} from "../../../../services/auth.service";
-import {debounceTime, Subject, tap} from "rxjs";
+import {debounceTime, Subject, takeUntil, tap} from "rxjs";
 import {AlertType} from "../../../../core/enums/alertType.enum";
 import {NgbAlert} from "@ng-bootstrap/ng-bootstrap";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
     selector: 'app-planning',
     templateUrl: './planning.component.html',
     styleUrls: ['./planning.component.css']
 })
-export class PlanningComponent implements OnInit {
+export class PlanningComponent implements OnInit, OnDestroy {
   public products: Product[] = new Array(25);
   public clientsPresent!: Client[];
   public productFamiliesPresent!: ProductFamily[];
@@ -34,6 +33,8 @@ export class PlanningComponent implements OnInit {
   filterForm: FormGroup;
   loading = false;
 
+  private notifier = new Subject<boolean>();
+
   @ViewChild('selfClosingAlert', { static: false }) selfClosingAlert!: NgbAlert;
   alertType = 'danger'
   private _message$ = new Subject<string>();
@@ -46,11 +47,16 @@ export class PlanningComponent implements OnInit {
 
     this._message$
       .pipe(
-        takeUntilDestroyed(),
+        takeUntil(this.notifier),
         tap((message) => (this.message = message)),
         debounceTime(5000),
       )
       .subscribe(() => this.selfClosingAlert?.close());
+  }
+
+  ngOnDestroy(): void {
+    this.notifier.next(true)
+    this.notifier.complete()
   }
 
   ngOnInit(): void {
@@ -65,7 +71,9 @@ export class PlanningComponent implements OnInit {
 
   loadContent(page: number){
     this.loading = true;
-    this.productService$.getProductsPage(page,{...this.filterForm.value}).subscribe({
+    this.productService$.getProductsPage(page,{...this.filterForm.value})
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         this.products = value.content;
         this.collectionSize = value.totalElements;
@@ -83,18 +91,26 @@ export class PlanningComponent implements OnInit {
   }
 
   loadFilter() {
-    this.productService$.getActiveClients().subscribe({
+    this.productService$.getActiveClients()
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         this.clientsPresent = value
       }
     })
-    this.productService$.getActiveBatches().subscribe({
+    this.productService$.getActiveBatches()
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => this.batchesPresent = value
     })
-    this.productService$.getActiveFamilies().subscribe({
+    this.productService$.getActiveFamilies()
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => this.productFamiliesPresent = value
     })
-    this.productService$.getActivePackets().subscribe({
+    this.productService$.getActivePackets()
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => this.packetsPresent = value
     })
   }
@@ -105,7 +121,9 @@ export class PlanningComponent implements OnInit {
   }
 
   archiveAll() {
-    this.productService$.archiveAll().subscribe({
+    this.productService$.archiveAll()
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: () => this.loadContent(1)
     })
   }
@@ -131,4 +149,6 @@ export class PlanningComponent implements OnInit {
     this.alertType = type;
     this._message$.next(message);
   }
+
+
 }

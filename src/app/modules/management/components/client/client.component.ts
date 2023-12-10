@@ -1,9 +1,9 @@
-import {Component, TemplateRef, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {Client} from "../../../../core/models/client.model";
 import {FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {ClientService} from "../../services/client.service";
 import {NgbAlert, NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {debounceTime, Subject, tap} from "rxjs";
+import {debounceTime, Subject, takeUntil, tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {AlertType} from "../../../../core/enums/alertType.enum";
 
@@ -12,13 +12,15 @@ import {AlertType} from "../../../../core/enums/alertType.enum";
   templateUrl: './client.component.html',
   styleUrls: ['./client.component.css']
 })
-export class ClientComponent {
+export class ClientComponent implements OnInit, OnDestroy {
   clients: Client[] = new Array(20)
   clientForm!: FormGroup;
   create = false;
   selectedClientId: number = 0;
   pageLoading = false;
   clientSaving = false;
+
+  private notifier = new Subject<boolean>();
 
   @ViewChild('selfClosingAlert', { static: false }) selfClosingAlert!: NgbAlert;
   alertType = 'danger'
@@ -30,11 +32,16 @@ export class ClientComponent {
               private fb: FormBuilder) {
     this._message$
       .pipe(
-        takeUntilDestroyed(),
+        takeUntil(this.notifier),
         tap((message) => (this.message = message)),
         debounceTime(5000),
       )
       .subscribe(() => this.selfClosingAlert?.close());
+  }
+
+  ngOnDestroy(): void {
+    this.notifier.next(true)
+    this.notifier.complete()
   }
 
   ngOnInit(): void {
@@ -44,7 +51,9 @@ export class ClientComponent {
   load() {
     this.pageLoading = true;
     this.clientForm = this.generateClientForm();
-    this.clientService$.getClients().subscribe({
+    this.clientService$.getClients()
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         this.clients = value
         this.pageLoading = false;
@@ -62,7 +71,9 @@ export class ClientComponent {
   getClient(id: number, modal: TemplateRef<any>) {
     this.create = false;
     this.selectedClientId = id
-    this.clientService$.getClient(id).subscribe({
+    this.clientService$.getClient(id)
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         this.setClientForm(value)
         this.open(modal)
@@ -74,7 +85,9 @@ export class ClientComponent {
   saveClient(modal: any) {
     this.clientSaving = true;
     if (this.create) {
-      this.clientService$.createClient(this.clientForm.value).subscribe({
+      this.clientService$.createClient(this.clientForm.value)
+        .pipe(takeUntil(this.notifier))
+        .subscribe({
         next: () => {
           this.load();
           this.clientSaving = false;
@@ -83,7 +96,9 @@ export class ClientComponent {
         error: err => this.showMessage(err.error.errors.message, "warning")
       })
     } else {
-      this.clientService$.updateClient(this.selectedClientId ,this.clientForm.value).subscribe({
+      this.clientService$.updateClient(this.selectedClientId ,this.clientForm.value)
+        .pipe(takeUntil(this.notifier))
+        .subscribe({
         next: () => {
           this.load();
           this.clientSaving = false;
@@ -97,7 +112,9 @@ export class ClientComponent {
 
 
   deleteClient(modal: any) {
-    this.clientService$.deleteClient(this.selectedClientId).subscribe({
+    this.clientService$.deleteClient(this.selectedClientId)
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: () => {
         this.load()
         this.showMessage('Client has been deleted!', "success")

@@ -1,10 +1,9 @@
-import {Component, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Batch} from "../../../../core/models/batch.model";
 import {BatchService} from "../../services/batch.service";
 import {AuthService} from "../../../../services/auth.service";
 import {NgbAlert} from "@ng-bootstrap/ng-bootstrap";
-import {debounceTime, Subject, tap} from "rxjs";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {debounceTime, Subject, takeUntil, tap} from "rxjs";
 import {AlertType} from "../../../../core/enums/alertType.enum";
 
 @Component({
@@ -12,7 +11,7 @@ import {AlertType} from "../../../../core/enums/alertType.enum";
   templateUrl: './weld.component.html',
   styleUrls: ['./weld.component.css']
 })
-export class WeldComponent {
+export class WeldComponent implements OnInit, OnDestroy {
   public batches: Batch[] = new Array(5);
 
   public  collectionSize!: number;
@@ -26,6 +25,8 @@ export class WeldComponent {
 
   public loading = false;
 
+  private notifier = new Subject<boolean>();
+
   @ViewChild('selfClosingAlert', { static: false }) selfClosingAlert!: NgbAlert;
   alertType = 'danger'
   private _message$ = new Subject<string>();
@@ -35,11 +36,16 @@ export class WeldComponent {
               private authService$: AuthService) {
     this._message$
       .pipe(
-        takeUntilDestroyed(),
+        takeUntil(this.notifier),
         tap((message) => (this.message = message)),
         debounceTime(5000),
       )
       .subscribe(() => this.selfClosingAlert?.close());
+  }
+
+  ngOnDestroy(): void {
+    this.notifier.next(true)
+    this.notifier.complete()
   }
 
   ngOnInit(): void {
@@ -48,7 +54,9 @@ export class WeldComponent {
 
   loadContent(page: number) {
     this.loading = true;
-    this.batchService$.getBatchesFor(page, "WELDED").subscribe({
+    this.batchService$.getBatchesFor(page, "WELDED")
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         this.batches = value.content;
         this.collectionSize = value.totalElements;
@@ -62,21 +70,27 @@ export class WeldComponent {
   }
 
   onStartJob(id: number, index: number) {
-    this.batchService$.doJob("WELDED", id, 'start').subscribe({
+    this.batchService$.doJob("WELDED", id, 'start')
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => this.batches[index] = value,
       error: err => this.showMessage(err.error.errors.message, "warning")
     });
   }
 
   onPauseJob(id: number, index: number) {
-    this.batchService$.doJob("WELDED", id, 'pause').subscribe({
+    this.batchService$.doJob("WELDED", id, 'pause')
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => this.batches[index] = value,
       error: err => this.showMessage(err.error.errors.message, "warning")
     });
   }
 
   onFinishJob(id: number, index: number) {
-    this.batchService$.doJob("WELDED", id, 'finish').subscribe({
+    this.batchService$.doJob("WELDED", id, 'finish')
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: () => this.batches.splice(index, 1),
       error: err => this.showMessage(err.error.errors.message, "warning")
     });
@@ -110,7 +124,9 @@ export class WeldComponent {
   }
 
   doJob() {
-    this.batchService$.getBatchByCode(this.scanInput).subscribe({
+    this.batchService$.getBatchByCode(this.scanInput)
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         if (!this.isBatchOngoing(value)) {
           this.batches.filter(b => b.id !== value.id);

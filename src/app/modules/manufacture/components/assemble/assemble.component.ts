@@ -1,10 +1,9 @@
-import {Component, ViewChild} from '@angular/core';
+import {Component, OnDestroy, ViewChild} from '@angular/core';
 import {Batch} from "../../../../core/models/batch.model";
 import {BatchService} from "../../services/batch.service";
 import {AuthService} from "../../../../services/auth.service";
 import {NgbAlert} from "@ng-bootstrap/ng-bootstrap";
-import {debounceTime, Subject, tap} from "rxjs";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {debounceTime, Subject, takeUntil, tap} from "rxjs";
 import {AlertType} from "../../../../core/enums/alertType.enum";
 
 @Component({
@@ -12,7 +11,7 @@ import {AlertType} from "../../../../core/enums/alertType.enum";
   templateUrl: './assemble.component.html',
   styleUrls: ['./assemble.component.css']
 })
-export class AssembleComponent {
+export class AssembleComponent implements OnDestroy{
   public batches: Batch[] = new Array(5);
 
   public  collectionSize!: number;
@@ -31,16 +30,23 @@ export class AssembleComponent {
   private _message$ = new Subject<string>();
   message = ''
 
+  private notifier = new Subject<boolean>();
+
   constructor(private batchService$: BatchService,
               private authService$: AuthService) {
     this._message$
       .pipe(
-        takeUntilDestroyed(),
+        takeUntil(this.notifier),
         tap((message) => (this.message = message)),
         debounceTime(5000),
       )
       .subscribe(() => this.selfClosingAlert?.close());
   }
+
+  ngOnDestroy(): void {
+    this.notifier.next(true);
+    this.notifier.complete();
+    }
 
   ngOnInit(): void {
     this.loadContent(1)
@@ -48,7 +54,9 @@ export class AssembleComponent {
 
   loadContent(page: number) {
     this.loading = true;
-    this.batchService$.getBatchesFor(page, "ASSEMBLED").subscribe({
+    this.batchService$.getBatchesFor(page, "ASSEMBLED")
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         this.batches = value.content;
         this.collectionSize = value.totalElements;
@@ -62,21 +70,27 @@ export class AssembleComponent {
   }
 
   onStartJob(id: number, index: number) {
-    this.batchService$.doJob("ASSEMBLED", id, 'start').subscribe({
+    this.batchService$.doJob("ASSEMBLED", id, 'start')
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => this.batches[index] = value,
       error: err => this.showMessage(err.error.errors.message, "warning")
     });
   }
 
   onPauseJob(id: number, index: number) {
-    this.batchService$.doJob("ASSEMBLED", id, 'pause').subscribe({
+    this.batchService$.doJob("ASSEMBLED", id, 'pause')
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => this.batches[index] = value,
       error: err => this.showMessage(err.error.errors.message, "warning")
     });
   }
 
   onFinishJob(id: number, index: number) {
-    this.batchService$.doJob("ASSEMBLED", id, 'finish').subscribe({
+    this.batchService$.doJob("ASSEMBLED", id, 'finish')
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: () => this.batches.splice(index, 1),
       error: err => this.showMessage(err.error.errors.message, "warning")
     });
@@ -110,7 +124,9 @@ export class AssembleComponent {
   }
 
   doJob() {
-    this.batchService$.getBatchByCode(this.scanInput).subscribe({
+    this.batchService$.getBatchByCode(this.scanInput)
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         if (!this.isBatchOngoing(value)) {
           this.batches.filter(b => b.id !== value.id);

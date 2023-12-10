@@ -1,11 +1,10 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {BatchService} from "../../services/batch.service";
 import {Batch} from "../../../../core/models/batch.model";
 import {ProductComponent} from "../../../../core/models/product-component.model";
 import {AuthService} from "../../../../services/auth.service";
-import {debounceTime, Subject, tap} from "rxjs";
+import {debounceTime, Subject, takeUntil, tap} from "rxjs";
 import {AlertType} from "../../../../core/enums/alertType.enum";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {NgbAlert} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
@@ -13,7 +12,7 @@ import {NgbAlert} from "@ng-bootstrap/ng-bootstrap";
   templateUrl: './cut.component.html',
   styleUrls: ['./cut.component.css']
 })
-export class CutComponent implements OnInit{
+export class CutComponent implements OnInit, OnDestroy{
   public batches: Batch[] = new Array(25)
 
   public  collectionSize!: number;
@@ -27,6 +26,8 @@ export class CutComponent implements OnInit{
 
   public loading = true;
 
+  private notifier = new Subject<boolean>();
+
   @ViewChild('selfClosingAlert', { static: false }) selfClosingAlert!: NgbAlert;
   alertType = 'danger'
   private _message$ = new Subject<string>();
@@ -37,11 +38,16 @@ export class CutComponent implements OnInit{
 
     this._message$
       .pipe(
-        takeUntilDestroyed(),
+        takeUntil(this.notifier),
         tap((message) => (this.message = message)),
         debounceTime(5000),
       )
       .subscribe(() => this.selfClosingAlert?.close());
+  }
+
+  ngOnDestroy(): void {
+    this.notifier.next(true)
+    this.notifier.complete()
   }
 
   ngOnInit(): void {
@@ -50,7 +56,9 @@ export class CutComponent implements OnInit{
 
   loadContent(page: number) {
     this.loading = true
-    this.batchService$.getBatchesFor(page, "CUT").subscribe({
+    this.batchService$.getBatchesFor(page, "CUT")
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         value.content.forEach(b => b.batchComponents = this.mapBatchComponents(b))
         this.batches = value.content
@@ -65,7 +73,9 @@ export class CutComponent implements OnInit{
   }
 
   onStartJob(id: number, index: number) {
-    this.batchService$.doJob("CUT", id, 'start').subscribe({
+    this.batchService$.doJob("CUT", id, 'start')
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         value.batchComponents = this.mapBatchComponents(value);
         this.batches[index] = value
@@ -75,7 +85,9 @@ export class CutComponent implements OnInit{
   }
 
   onPauseJob(id: number, index: number) {
-    this.batchService$.doJob("CUT", id, 'pause').subscribe({
+    this.batchService$.doJob("CUT", id, 'pause')
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         value.batchComponents = this.mapBatchComponents(value);
         this.batches[index] = value
@@ -85,7 +97,9 @@ export class CutComponent implements OnInit{
   }
 
   onFinishJob(id: number, index: number) {
-    this.batchService$.doJob("CUT", id, 'finish').subscribe({
+    this.batchService$.doJob("CUT", id, 'finish')
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: () => this.batches.splice(index, 1),
       error: err => this.showMessage(err.error.errors.message, "warning")
     });
@@ -118,7 +132,9 @@ export class CutComponent implements OnInit{
   }
 
   doJob() {
-    this.batchService$.getBatchByCode(this.scanInput).subscribe({
+    this.batchService$.getBatchByCode(this.scanInput)
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         if (!this.isBatchOngoing(value)) {
           this.batches.filter(b => b.id !== value.id);

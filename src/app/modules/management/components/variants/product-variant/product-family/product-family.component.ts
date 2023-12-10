@@ -1,12 +1,11 @@
-import {Component, EventEmitter, OnInit, Output, TemplateRef, ViewChild} from '@angular/core';
+import {Component, EventEmitter, OnDestroy, OnInit, Output, TemplateRef, ViewChild} from '@angular/core';
 import {NgbAlert, NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {FormArray, FormControl, FormGroup} from "@angular/forms";
 import {ProductFamily} from "../../../../../../core/models/product-family.model";
 import {ProductFamilyService} from "../../../../services/product-family.service";
 import {Step} from "../../../../../../core/enums/step.enum";
 import {AlertType} from "../../../../../../core/enums/alertType.enum";
-import {debounceTime, Subject, tap} from "rxjs";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {debounceTime, Subject, takeUntil, tap} from "rxjs";
 
 
 @Component({
@@ -14,12 +13,14 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
   templateUrl: './product-family.component.html',
   styleUrls: ['./product-family.component.css']
 })
-export class ProductFamilyComponent implements OnInit {
+export class ProductFamilyComponent implements OnInit, OnDestroy {
   productFamilies!: ProductFamily[];
   selectedProductFamily!: ProductFamily;
   productFamilyForm!: FormGroup;
   @Output() productFamilyIdEmitter = new EventEmitter<ProductFamily>
   @Output() errorEmitter = new EventEmitter<{message: string, type: AlertType}>
+
+  private notifier = new Subject<boolean>();
 
   @ViewChild('selfClosingAlert', { static: false }) selfClosingAlert!: NgbAlert;
   alertType = 'danger'
@@ -29,11 +30,16 @@ export class ProductFamilyComponent implements OnInit {
   constructor(private productFamilyService$: ProductFamilyService, private modalService: NgbModal) {
     this._message$
       .pipe(
-        takeUntilDestroyed(),
+        takeUntil(this.notifier),
         tap((message) => (this.message = message)),
         debounceTime(5000),
       )
       .subscribe(() => this.selfClosingAlert?.close());
+  }
+
+  ngOnDestroy(): void {
+    this.notifier.next(true)
+    this.notifier.complete()
   }
 
   ngOnInit(): void {
@@ -41,7 +47,9 @@ export class ProductFamilyComponent implements OnInit {
   }
 
   load() {
-    this.productFamilyService$.getProductFamilies().subscribe({
+    this.productFamilyService$.getProductFamilies()
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         this.productFamilies = value
       },
@@ -66,7 +74,9 @@ export class ProductFamilyComponent implements OnInit {
 
 
   saveProductFamily(modal: any) {
-    this.productFamilyService$.saveProductFamily(this.productFamilyForm.value).subscribe({
+    this.productFamilyService$.saveProductFamily(this.productFamilyForm.value)
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: () => {
         this.load()
         modal.close()

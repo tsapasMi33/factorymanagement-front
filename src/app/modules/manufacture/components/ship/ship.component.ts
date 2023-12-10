@@ -1,18 +1,17 @@
-import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {PacketService} from "../../services/packet.service";
 import {Packet} from "../../../../core/models/packet.model";
 import {FormArray, FormControl, FormGroup} from "@angular/forms";
 import {ShipmentService} from "../../services/shipment.service";
 import {NgbAlert, NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {debounceTime, Subject, tap} from "rxjs";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {debounceTime, Subject, takeUntil, tap} from "rxjs";
 import {AlertType} from "../../../../core/enums/alertType.enum";
 @Component({
   selector: 'app-ship',
   templateUrl: './ship.component.html',
   styleUrls: ['./ship.component.css']
 })
-export class ShipComponent implements OnInit{
+export class ShipComponent implements OnInit, OnDestroy {
   packets!: Packet[]
   presentClients!: string[]
   selectedClient = ''
@@ -24,6 +23,8 @@ export class ShipComponent implements OnInit{
 
   shipmentClient = ''
 
+  private notifier = new Subject<boolean>();
+
   @ViewChild('selfClosingAlert', { static: false }) selfClosingAlert!: NgbAlert;
   alertType = 'danger'
   private _message$ = new Subject<string>();
@@ -34,11 +35,16 @@ export class ShipComponent implements OnInit{
               private modalService: NgbModal) {
     this._message$
       .pipe(
-        takeUntilDestroyed(),
+        takeUntil(this.notifier),
         tap((message) => (this.message = message)),
         debounceTime(5000),
       )
       .subscribe(() => this.selfClosingAlert?.close());
+  }
+
+  ngOnDestroy(): void {
+    this.notifier.next(true)
+    this.notifier.complete()
   }
 
   ngOnInit(): void {
@@ -47,7 +53,9 @@ export class ShipComponent implements OnInit{
   }
 
   loadContent() {
-    this.packetService$.getPackets('PACKED').subscribe({
+    this.packetService$.getPackets('PACKED')
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         this.packets = value;
         this.presentClients = [...new Map(value.map(value => [value.clientName, value.clientName])).values()]
@@ -85,8 +93,13 @@ export class ShipComponent implements OnInit{
   }
 
   shipPackets(modal?: any) {
-    this.shipmentService$.shipPackets(this.shipmentForm.value).subscribe({
-      next: () => this.ngOnInit(),
+    this.shipmentService$.shipPackets(this.shipmentForm.value)
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
+      next: () => {
+        this.ngOnInit()
+        this.showMessage("The shipment has been sent successfully", "success");
+      },
       error: err => this.showMessage(err.error.errors.message, "warning")
     })
     if (modal) {

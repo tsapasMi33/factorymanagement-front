@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
 import {ProductVariantService} from "../../../services/product-variant.service";
 import {ProductComponent} from "../../../../../core/models/product-component.model";
@@ -6,15 +6,14 @@ import {ProductFamily} from "../../../../../core/models/product-family.model";
 import {Material} from "../../../../../core/enums/material.enum";
 import {AlertType} from "../../../../../core/enums/alertType.enum";
 import {NgbAlert} from "@ng-bootstrap/ng-bootstrap";
-import {debounceTime, Subject, tap} from "rxjs";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {debounceTime, Subject, takeUntil, tap} from "rxjs";
 
 @Component({
   selector: 'app-new-variant',
   templateUrl: './new-variant.component.html',
   styleUrls: ['./new-variant.component.css']
 })
-export class NewVariantComponent implements OnInit {
+export class NewVariantComponent implements OnInit, OnDestroy {
   productVariantForm!: FormGroup;
 
   totalCost = 0;
@@ -24,16 +23,22 @@ export class NewVariantComponent implements OnInit {
   private _message$ = new Subject<string>();
   message = ''
 
+  private notifier = new Subject<boolean>();
 
   constructor(private productVariantService$: ProductVariantService,
               private fb: FormBuilder) {
     this._message$
       .pipe(
-        takeUntilDestroyed(),
+        takeUntil(this.notifier),
         tap((message) => (this.message = message)),
         debounceTime(5000),
       )
       .subscribe(() => this.selfClosingAlert?.close());
+  }
+
+  ngOnDestroy(): void {
+    this.notifier.next(true)
+    this.notifier.complete()
   }
 
   ngOnInit(): void {
@@ -93,7 +98,9 @@ export class NewVariantComponent implements OnInit {
 
     const vForm = this.productVariantForm.value
     vForm.components = mappedComponents.flatMap( c => c);
-    this.productVariantService$.createProductVariant(vForm).subscribe({
+    this.productVariantService$.createProductVariant(vForm)
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: () => {
         this.productVariantForm = this.generateForm();
         this.showMessage('The new product Variant has been successfully encoded', "success")

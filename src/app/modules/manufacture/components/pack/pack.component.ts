@@ -1,4 +1,4 @@
-import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {Product} from "../../../../core/models/product.model";
 import {ProductFamily} from "../../../../core/models/product-family.model";
 import {FormArray, FormBuilder, FormControl, FormGroup} from "@angular/forms";
@@ -6,8 +6,7 @@ import {ProductService} from "../../services/product.service";
 import {PacketService} from "../../services/packet.service";
 import {Client} from "../../../../core/models/client.model";
 import {NgbAlert, NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {debounceTime, Subject, tap} from "rxjs";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {debounceTime, Subject, takeUntil, tap} from "rxjs";
 import {AlertType} from "../../../../core/enums/alertType.enum";
 
 @Component({
@@ -15,7 +14,7 @@ import {AlertType} from "../../../../core/enums/alertType.enum";
   templateUrl: './pack.component.html',
   styleUrls: ['./pack.component.css']
 })
-export class PackComponent implements OnInit{
+export class PackComponent implements OnInit, OnDestroy{
   public products: Product[] = new Array(25);
   public clientsPresent!: Client[];
   public productFamiliesPresent!: ProductFamily[];
@@ -36,6 +35,8 @@ export class PackComponent implements OnInit{
 
   modalInput = '';
 
+  private notifier = new Subject<boolean>();
+
   @ViewChild('selfClosingAlert', { static: false }) selfClosingAlert!: NgbAlert;
   alertType = 'danger'
   private _message$ = new Subject<string>();
@@ -47,11 +48,16 @@ export class PackComponent implements OnInit{
               private modalService: NgbModal) {
     this._message$
       .pipe(
-        takeUntilDestroyed(),
+        takeUntil(this.notifier),
         tap((message) => (this.message = message)),
         debounceTime(5000),
       )
       .subscribe(() => this.selfClosingAlert?.close());
+  }
+
+  ngOnDestroy(): void {
+    this.notifier.next(true)
+    this.notifier.complete()
   }
 
   ngOnInit(): void {
@@ -67,7 +73,9 @@ export class PackComponent implements OnInit{
 
   loadContent(page: number){
     this.loading = true;
-    this.productService$.getProductsPage(page, {nextStep:'PACKED', ...this.filterForm.value}).subscribe({
+    this.productService$.getProductsPage(page, {nextStep:'PACKED', ...this.filterForm.value})
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         this.products = value.content;
         this.collectionSize = value.totalElements;
@@ -81,7 +89,9 @@ export class PackComponent implements OnInit{
   }
 
   loadFilter() {
-    this.productService$.getActiveClients(undefined, 'PACKED').subscribe({
+    this.productService$.getActiveClients(undefined, 'PACKED')
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         this.clientsPresent = value;
       }
@@ -101,10 +111,13 @@ export class PackComponent implements OnInit{
   }
 
   onCreatePacket(modal?: any) {
-    this.packetService$.createPacket(this.createPacketForm.value).subscribe({
+    this.packetService$.createPacket(this.createPacketForm.value)
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: () => {
         this.loadContent(1);
         this.createPacketForm = this.generatePacketForm();
+        this.showMessage("The packet has been composed successfully", "success");
       },
       error: err => this.showMessage(err.error.errors.message, "warning")
     })

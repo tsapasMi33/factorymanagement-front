@@ -1,10 +1,9 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ProductService} from "../../services/product.service";
 import {Product} from "../../../../core/models/product.model";
 import {AuthService} from "../../../../services/auth.service";
 import {NgbAlert} from "@ng-bootstrap/ng-bootstrap";
-import {debounceTime, Subject, tap} from "rxjs";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {debounceTime, Subject, takeUntil, tap} from "rxjs";
 import {AlertType} from "../../../../core/enums/alertType.enum";
 
 @Component({
@@ -12,7 +11,7 @@ import {AlertType} from "../../../../core/enums/alertType.enum";
   templateUrl: './finish.component.html',
   styleUrls: ['./finish.component.css']
 })
-export class FinishComponent implements OnInit {
+export class FinishComponent implements OnInit, OnDestroy {
   public products: Product[] = new Array(15);
 
   public  collectionSize!: number;
@@ -26,6 +25,8 @@ export class FinishComponent implements OnInit {
 
   public loading = false;
 
+  private notifier = new Subject<boolean>();
+
   @ViewChild('selfClosingAlert', { static: false }) selfClosingAlert!: NgbAlert;
   alertType = 'danger'
   private _message$ = new Subject<string>();
@@ -35,11 +36,16 @@ export class FinishComponent implements OnInit {
               private authService$: AuthService) {
     this._message$
       .pipe(
-        takeUntilDestroyed(),
+        takeUntil(this.notifier),
         tap((message) => (this.message = message)),
         debounceTime(5000),
       )
       .subscribe(() => this.selfClosingAlert?.close());
+  }
+
+  ngOnDestroy(): void {
+    this.notifier.next(true)
+    this.notifier.complete()
   }
 
   ngOnInit(): void {
@@ -48,7 +54,9 @@ export class FinishComponent implements OnInit {
 
   loadContent(page: number) {
     this.loading = true;
-    this.productService$.getProductsFor(page, "FINISHED").subscribe({
+    this.productService$.getProductsFor(page, "FINISHED")
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         this.products = value.content;
         this.collectionSize = value.totalElements;
@@ -62,21 +70,27 @@ export class FinishComponent implements OnInit {
   }
 
   onStartJob(id: number, index: number) {
-    this.productService$.doJob("FINISHED", id, 'start').subscribe({
+    this.productService$.doJob("FINISHED", id, 'start')
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => this.products[index] = value,
       error: err => this.showMessage(err.error.errors.message, "warning")
     });
   }
 
   onPauseJob(id: number, index: number) {
-    this.productService$.doJob("FINISHED", id, 'pause').subscribe({
+    this.productService$.doJob("FINISHED", id, 'pause')
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => this.products[index] = value,
       error: err => this.showMessage(err.error.errors.message, "warning")
     });
   }
 
   onFinishJob(id: number, index: number) {
-    this.productService$.doJob("FINISHED", id, 'finish').subscribe({
+    this.productService$.doJob("FINISHED", id, 'finish')
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: () => this.products.splice(index, 1),
       error: err => this.showMessage(err.error.errors.message, "warning")
     });
@@ -110,7 +124,9 @@ export class FinishComponent implements OnInit {
 
   doJob() {
     let code = this.scanInput.split('/')
-    this.productService$.getProductByCode(code[0],code[1]).subscribe({
+    this.productService$.getProductByCode(code[0],code[1])
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         if (!this.isProductOngoing(value)) {
           this.products.filter(p => p.id !== value.id);

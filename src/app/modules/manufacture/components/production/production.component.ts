@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Product} from "../../../../core/models/product.model";
 import {ProductFamily} from "../../../../core/models/product-family.model";
 import {FormArray, FormBuilder, FormControl, FormGroup} from "@angular/forms";
@@ -6,8 +6,7 @@ import {ProductService} from "../../services/product.service";
 import {BatchService} from "../../services/batch.service";
 import {Client} from "../../../../core/models/client.model";
 import {NgbAlert} from "@ng-bootstrap/ng-bootstrap";
-import {debounceTime, Subject, tap} from "rxjs";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {debounceTime, Subject, takeUntil, tap} from "rxjs";
 import {AlertType} from "../../../../core/enums/alertType.enum";
 
 @Component({
@@ -15,7 +14,7 @@ import {AlertType} from "../../../../core/enums/alertType.enum";
   templateUrl: './production.component.html',
   styleUrls: ['./production.component.css']
 })
-export class ProductionComponent implements OnInit {
+export class ProductionComponent implements OnInit, OnDestroy {
   public products: Product[] = new Array(25);
   public clientsPresent!: Client[];
   public productFamiliesPresent!: ProductFamily[];
@@ -37,17 +36,24 @@ export class ProductionComponent implements OnInit {
 
   public loading = false
 
+  private notifier = new Subject<boolean>();
+
   constructor(private productService$: ProductService,
               private batchService$: BatchService,
               private fb: FormBuilder
               ) {
     this._message$
       .pipe(
-        takeUntilDestroyed(),
+        takeUntil(this.notifier),
         tap((message) => (this.message = message)),
         debounceTime(5000),
       )
       .subscribe(() => this.selfClosingAlert?.close());
+  }
+
+  ngOnDestroy(): void {
+    this.notifier.next(true)
+    this.notifier.complete()
   }
 
   ngOnInit(): void {
@@ -63,7 +69,9 @@ export class ProductionComponent implements OnInit {
 
   loadContent(page: number){
     this.loading = true;
-    this.productService$.getProductsPage(page,{currentStep:"ENCODED", ...this.filterForm.value}).subscribe({
+    this.productService$.getProductsPage(page,{currentStep:"ENCODED", ...this.filterForm.value})
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         this.products = value.content;
         this.collectionSize = value.totalElements;
@@ -78,12 +86,16 @@ export class ProductionComponent implements OnInit {
   }
 
   loadFilter() {
-    this.productService$.getActiveClients('ENCODED').subscribe({
+    this.productService$.getActiveClients('ENCODED')
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => {
         this.clientsPresent = value;
       }
     });
-    this.productService$.getActiveFamilies('ENCODED').subscribe({
+    this.productService$.getActiveFamilies('ENCODED')
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => this.productFamiliesPresent = value
     });
   }
@@ -102,7 +114,9 @@ export class ProductionComponent implements OnInit {
   }
 
   onPutBatchInProduction() {
-    this.batchService$.createBatch(this.createBatchForm.value).subscribe({
+    this.batchService$.createBatch(this.createBatchForm.value)
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: () => {
         this.loadContent(this.page);
         this.createBatchForm = this.generateBatchForm()

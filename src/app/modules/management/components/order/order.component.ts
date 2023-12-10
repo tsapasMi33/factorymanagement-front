@@ -1,13 +1,12 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Material} from "../../../../core/enums/material.enum";
 import {AbstractControl, FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {OrderService} from "../../services/order.service";
 import {ClientService} from "../../services/client.service";
 import {Client} from "../../../../core/models/client.model";
 import {ProductVariant} from "../../../../core/models/product-variant.model";
-import {debounceTime, Subject, tap} from "rxjs";
+import {debounceTime, Subject, takeUntil, tap} from "rxjs";
 import {NgbAlert} from "@ng-bootstrap/ng-bootstrap";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {AlertType} from "../../../../core/enums/alertType.enum";
 
 @Component({
@@ -15,7 +14,7 @@ import {AlertType} from "../../../../core/enums/alertType.enum";
   templateUrl: './order.component.html',
   styleUrls: ['./order.component.css']
 })
-export class OrderComponent implements OnInit {
+export class OrderComponent implements OnInit, OnDestroy {
   protected readonly Material = Material;
   orderForm!: FormGroup
   clients!: Client[];
@@ -25,20 +24,29 @@ export class OrderComponent implements OnInit {
   private _message$ = new Subject<string>();
   message = ''
 
+  private notifier = new Subject<boolean>();
+
   constructor(private orderService$: OrderService,
               private clientService$: ClientService,
               private fb: FormBuilder) {
     this._message$
       .pipe(
-        takeUntilDestroyed(),
+        takeUntil(this.notifier),
         tap((message) => (this.message = message)),
         debounceTime(5000),
       )
       .subscribe(() => this.selfClosingAlert?.close());
   }
 
+  ngOnDestroy(): void {
+    this.notifier.next(true)
+    this.notifier.complete()
+  }
+
   ngOnInit(): void {
-    this.clientService$.getClients().subscribe({
+    this.clientService$.getClients()
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: value => this.clients = value,
       error: () => this.showMessage("An unexpected error occurred! Please Reload the page. If the problem persists, contact tech support.", "danger")
     })
@@ -72,7 +80,9 @@ export class OrderComponent implements OnInit {
   }
 
   createOrder() {
-    this.orderService$.createOrder(this.orderForm.value).subscribe({
+    this.orderService$.createOrder(this.orderForm.value)
+      .pipe(takeUntil(this.notifier))
+      .subscribe({
       next: () => {
         this.showMessage('The order has been encoded successfully!', "success");
         this.orderForm = this.generateOrderForm();
