@@ -86,7 +86,6 @@ export class ProductionStatisticsComponent implements OnDestroy {
       .pipe(takeUntil(this.notifier))
       .subscribe({
       next: value => {
-        console.log(value)
         this._cache = {data: value, parent: null, children: new Map(), level: 'top', concerns: 'all'}
         this.chart.updateProduction(this._cache.data.stats, this._cache.data.labels, this._cache.level)
         this.ready = true;
