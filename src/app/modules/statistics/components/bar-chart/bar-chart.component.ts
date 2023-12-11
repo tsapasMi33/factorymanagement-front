@@ -102,22 +102,21 @@ export class BarChartComponent {
     }
   }
 
-  public updateProduction(stats: number[], labels: string[], level: string): void {
+  public updateProduction(stats: IStat, labels: string[], level: string): void {
     this.level = level
     if (level === 'user') {
       this.chartType = 'pie'
       this.pieChartData.labels = labels
       this.pieChartData.datasets[0].data = [];
       for (const k of labels) {
-        // @ts-ignore
         this.pieChartData.datasets[0].data.push(stats[k])
       }
       this.chosenOptions = this.pieChartOptions
       this.chosenData = this.pieChartData
     } else {
       this.barChartData.labels = labels
+      this.barChartData.datasets[0].data = [];
       for (const k of labels){
-      // @ts-ignore
         this.barChartData.datasets[0].data.push(stats[k]);
       }
       this.chartType = "bar"
@@ -156,4 +155,9 @@ export class BarChartComponent {
 
     this.chart?.update()
   }
+}
+
+
+interface IStat {
+  [key:string]: number
 }

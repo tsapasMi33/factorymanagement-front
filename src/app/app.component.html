@@ -1,12 +1,15 @@
-<ng-container *ngIf="(connected | async) === null">
+<ng-container *ngIf="(connected | async) === null; else isConnected">
   <app-login></app-login>
 </ng-container>
-<ng-container *ngIf="(connected | async) !== null">
-  <div class="d-flex flex-column min-vh-100">
-    <app-header></app-header>
-    <main class="container-fluid">
-      <router-outlet></router-outlet>
-    </main>
-    <app-footer class="mt-auto"></app-footer>
-  </div>
-</ng-container>
+
+<ng-template #isConnected>
+  <ng-container>
+    <div class="d-flex flex-column min-vh-100">
+      <app-header></app-header>
+      <main class="container-fluid">
+        <router-outlet></router-outlet>
+      </main>
+      <app-footer class="mt-auto"></app-footer>
+    </div>
+  </ng-container>
+</ng-template>
